@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
@@ -29,29 +30,24 @@ const options = [
 const ITEM_HEIGHT = 80;
 
 const useStyles = makeStyles((theme) => ({
-  icon: {
-    marginRight: theme.spacing(2),
+  grid: {
+    padding: theme.spacing(8)
   },
-  heroContent: {
-    backgroundColor: theme.palette.background.paper,
-    padding: theme.spacing(8, 0, 6),
+  classGrid: {
+    height: '100vh',
   },
-  heroButtons: {
-    marginTop: theme.spacing(4),
+  card: {
+    display: 'flex',
+    flexDirection: 'column',
   },
   cardGrid: {
     paddingTop: theme.spacing(8),
     paddingBottom: theme.spacing(8),
   },
-  card: {
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-  },
   cardCenter: {
-    position: 'relative',
-    display: 'flex',
-    flexDirection: 'column',
+    position: 'fixed',
+    top: '50vh',
+    transform: 'translate(0, -50%)'
   },
   cardMedia: {
     paddingTop: '56.25%', // 16:9
@@ -67,18 +63,17 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Capture() {
   const classes = useStyles();
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
   function ClassCard() {
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+      setAnchorEl(event.currentTarget);
+    };
+  
+    const handleClose = () => {
+      setAnchorEl(null);
+    };
     return (
       <React.Fragment>
         <Grid item xs={12}>
@@ -106,7 +101,7 @@ export default function Capture() {
                     }}
                   >
                     {options.map((option) => (
-                      <MenuItem key={option} selected={option === 'Pyxis'} onClick={handleClose}>
+                      <MenuItem key={option} onClick={handleClose}>
                         {option}
                       </MenuItem>
                     ))}
@@ -134,56 +129,84 @@ export default function Capture() {
     );
   };
 
+  const trainGrid = React.useRef(null);
+  const previewGrid = React.useRef(null);
+  
+  function useParentWidthSize(porps) {
+    const [width, setWidth] = React.useState();
+    React.useEffect(() => {
+      let temp = getComputedStyle(porps.parentNode.current)
+      function updateSize() {
+        setWidth(porps.parentNode.current.clientWidth- parseFloat(temp.paddingLeft) - parseFloat(temp.paddingRight));
+      }
+      window.addEventListener('resize', updateSize);
+      updateSize();
+      return () => window.removeEventListener('resize', updateSize);
+    }, []);
+    return width;
+  }
+
+  function TrainCard(props) {
+    const width = useParentWidthSize(props);
+    return (
+      <React.Fragment>
+        <Card style={{width: width}} className={classes.cardCenter} >
+          <CardHeader classes="title" title="Training"/>
+          <CardContent className={classes.cardContent}>
+            <Typography>
+              This is a media card. You can use this section to describe the content.
+            </Typography>
+          </CardContent>
+          <CardActions>
+            <Button size="small" color="primary">
+              View
+            </Button>
+            <Button size="small" color="primary">
+              Edit
+            </Button>
+          </CardActions>
+        </Card>
+      </React.Fragment>
+    );
+  }
+
+  function PreviewCard(props) {
+    const width = useParentWidthSize(props);
+    return (
+      <React.Fragment>
+        <Card style={{width: width}} className={classes.cardCenter}>
+          <CardHeader title="Preview"/>
+          <CardContent className={classes.cardContent}>
+            <Typography>
+              This is a media card. You can use this section to describe the content.
+            </Typography>
+          </CardContent>
+        </Card>
+      </React.Fragment>
+    );
+  }
+
   return (
     <React.Fragment>
       <CssBaseline />
       <main>
         <Container className={classes.cardGrid} maxWidth="xl">
-          <Grid container spacing={5} alignItems="center">
-            <Grid container item key={1} xs={12} sm={6} md={6} spacing={5} justifyContent="center" direction="column">
+          <Grid container spacing={8}>
+            <Grid container item className={classes.classGrid} key={1} xs={12} sm={6} md={6} spacing={5} alignContent="center">
               <ClassCard />
-              <ClassCard />
-              <Card className={classes.card}>
-                <Button size="large" color="primary">
-                  Add new class
-                </Button>
-              </Card>
+              <Grid item xs={12}>
+                <Card className={classes.card}>
+                  <Button size="large" color="primary">
+                    Add new class
+                  </Button>
+                </Card>
+              </Grid>
             </Grid>
-            <Grid item key={2} xs={12} sm={6} md={2}>
-              <Card className={classes.cardCenter}>
-                <CardHeader classes="title" title="Training"/>
-                <CardContent className={classes.cardContent}>
-                  <Typography>
-                    This is a media card. You can use this section to describe the content.
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button size="small" color="primary">
-                    View
-                  </Button>
-                  <Button size="small" color="primary">
-                    Edit
-                  </Button>
-                </CardActions>
-              </Card>
+            <Grid item ref={trainGrid} key={2} xs={12} sm={6} md={2}>
+              <TrainCard parentNode={trainGrid}/>
             </Grid>
-            <Grid item key={3} xs={12} sm={6} md={4}>
-              <Card className={classes.cardCenter}>
-                <CardHeader title="Preview"/>
-                <CardContent className={classes.cardContent}>
-                  <Typography>
-                    This is a media card. You can use this section to describe the content.
-                  </Typography>
-                </CardContent>
-                <CardActions>
-                  <Button size="small" color="primary">
-                    View
-                  </Button>
-                  <Button size="small" color="primary">
-                    Edit
-                  </Button>
-                </CardActions>
-              </Card>
+            <Grid item ref={previewGrid} key={3} xs={12} sm={6} md={4}>
+              <PreviewCard parentNode={previewGrid}/>
             </Grid>
           </Grid>
         </Container>
