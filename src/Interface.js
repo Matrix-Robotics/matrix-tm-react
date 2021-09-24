@@ -138,7 +138,8 @@ export default function Interface() {
       switch (opt) {
         case 'Delete Class':
           console.log(tempList);
-          tempList.splice(props.cardId-1, 1);
+          let index = tempList.indexOf(props.cardId);
+          tempList.splice(index, 1);
           handleList(tempList);
           break
         case 'Disable Class':
