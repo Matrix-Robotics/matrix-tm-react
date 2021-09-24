@@ -83,12 +83,7 @@ export default function Interface() {
       2
     ]);
 
-    // const [newClass, setNewClass] = React.useState([]);
-    // const [currentId, setCurrentId] = React.useState(3);
-
     const onAddClassBtnClick = () => {
-      // setNewClass(newClass.concat(<ClassCard cardId={currentId}/>));
-      // setCurrentId(currentId+1);
       setList([...list, list.at(-1)+1 ]);
     };
     
