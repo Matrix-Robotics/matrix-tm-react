@@ -17,3 +17,7 @@ code {
   margin: 0!important;
   align-self: flex-end!important;
 }
+
+.MuiButton-root {
+  text-transform: none!important;
+}

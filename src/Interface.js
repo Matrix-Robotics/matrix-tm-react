@@ -16,6 +16,7 @@ import Typography from '@material-ui/core/Typography';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import PublishIcon from '@material-ui/icons/Publish';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
+import CreateIcon from '@material-ui/icons/Create';
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 import AssessmentOutlinedIcon from '@material-ui/icons/AssessmentOutlined';
 import VideocamOutlinedIcon from '@material-ui/icons/VideocamOutlined';
@@ -25,17 +26,6 @@ import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
-
-const options = [
-  'None',
-  'Pyxis',
-  'Atria',
-  'Callisto',
-  'Sedna',
-  'Titania',
-  'Triton',
-  'Umbriel',
-];
 
 const ITEM_HEIGHT = 80;
 
@@ -83,25 +73,38 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Capture() {
+export default function Interface() {
+
   const classes = useStyles();
 
-  function ClassCard() {
-    const [newClass, setNewClass] = React.useState([]);
-    
+  function ClassColumn() {
+    const [list,setList] = React.useState([
+      1,
+      2
+    ]);
+
+    // const [newClass, setNewClass] = React.useState([]);
+    // const [currentId, setCurrentId] = React.useState(3);
+
     const onAddClassBtnClick = () => {
-      setNewClass(newClass.concat(<NewClassCard />));
+      // setNewClass(newClass.concat(<ClassCard cardId={currentId}/>));
+      // setCurrentId(currentId+1);
+      setList([...list, list.at(-1)+1 ]);
     };
+    
+    const handleList = (newList) => {
+      setList(newList);
+    }
   
     return (
       <React.Fragment>
-        <NewClassCard />
-        <NewClassCard />
-        {newClass}
+        {list.map((value) => (
+          <ClassCard cardId={value} list={list} onChange={handleList}/>
+        ))}
         <Grid item xs={12}>
           <Card className={classes.cardClass}>
             <Button size="large" color="primary" onClick={onAddClassBtnClick} startIcon={<AddOutlinedIcon />}>
-              Add new class
+              Add New Class
             </Button>
           </Card>
         </Grid>
@@ -109,7 +112,13 @@ export default function Capture() {
     );
   };
 
-  function NewClassCard() {
+  function ClassCard(props) {
+    const options = [
+      'Delete Class',
+      'Disable Class',
+      'Remove All Samples'
+    ];
+    
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
@@ -119,6 +128,27 @@ export default function Capture() {
     const handleClose = () => {
       setAnchorEl(null);
     };
+
+    const handleList = (list) => {
+      props.onChange(list);
+    }
+
+    const handleOpe = (opt) => {
+      let tempList = props.list.slice();
+      switch (opt) {
+        case 'Delete Class':
+          console.log(tempList);
+          tempList.splice(props.cardId-1, 1);
+          handleList(tempList);
+          break
+        case 'Disable Class':
+          break
+        case 'Remove All Samples':
+          break
+        default:
+      };
+    }
+
     return (
       <React.Fragment>
         <Grid item xs={12}>
@@ -141,19 +171,19 @@ export default function Capture() {
                     PaperProps={{
                       style: {
                         maxHeight: ITEM_HEIGHT * 4.5,
-                        width: '20ch',
+                        width: 'auto',
                       },
                     }}
                   >
-                    {options.map((option) => (
-                      <MenuItem key={option} onClick={handleClose}>
-                        {option}
+                    {options.map((value, index) => (
+                      <MenuItem key={index} onClick={() => handleOpe(value)}>
+                        {value}
                       </MenuItem>
                     ))}
                   </Menu>
                 </div>
               }
-              title="Class 1"
+              title={"Class " + props.cardId}
             />
             <CardContent className={classes.cardContent}>
               <Typography>
@@ -163,6 +193,9 @@ export default function Capture() {
             <CardActions className={classes.cardButton}>
               <Button variant="contained" size="large" startIcon={<VideocamOutlinedIcon />}>
                 Webcam
+              </Button>
+              <Button variant="contained" size="large" startIcon={<CreateIcon />}>
+                Draw
               </Button>
               <Button variant="contained" size="large" startIcon={<NoteAddIcon />}>
                 Upload
@@ -191,7 +224,7 @@ export default function Capture() {
     return width;
   }
 
-  function TrainCard(props) {
+  function TrainColumn(props) {
     const width = useParentWidthSize(props);
     return (
       <React.Fragment>
@@ -262,7 +295,7 @@ export default function Capture() {
     );
   }
 
-  function PreviewCard(props) {
+  function PreviewColumn(props) {
     const width = useParentWidthSize(props);
     return (
       <React.Fragment>
@@ -289,13 +322,13 @@ export default function Capture() {
         <Container className={classes.cardGrid} maxWidth="xl">
           <Grid container spacing={8}>
             <Grid container item className={classes.classGrid} key={1} xs={12} sm={6} md={6} alignContent="center">
-              <ClassCard />
+              <ClassColumn />
             </Grid>
             <Grid item ref={trainGrid} key={2} xs={12} sm={6} md={2}>
-              <TrainCard parentNode={trainGrid}/>
+              <TrainColumn parentNode={trainGrid}/>
             </Grid>
             <Grid item ref={previewGrid} key={3} xs={12} sm={6} md={4}>
-              <PreviewCard parentNode={previewGrid}/>
+              <PreviewColumn parentNode={previewGrid}/>
             </Grid>
           </Grid>
         </Container>

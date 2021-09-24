@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import Capture from './Capture';
+import Interface from './Interface';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Capture />
+    <Interface />
   </React.StrictMode>,
   document.getElementById('root')
 );
