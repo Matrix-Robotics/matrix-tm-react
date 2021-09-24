@@ -84,7 +84,11 @@ export default function Interface() {
     ]);
 
     const onAddClassBtnClick = () => {
-      setList([...list, list.at(-1)+1 ]);
+      if(list.length) {
+        setList([...list, list.at(-1)+1 ]);
+      } else {
+        setList([1]);
+      }
     };
     
     const handleList = (newList) => {
@@ -132,7 +136,7 @@ export default function Interface() {
       let tempList = props.list.slice();
       switch (opt) {
         case 'Delete Class':
-          console.log(tempList);
+          // console.log(tempList);
           let index = tempList.indexOf(props.cardId);
           tempList.splice(index, 1);
           handleList(tempList);
