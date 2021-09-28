@@ -21,3 +21,7 @@ code {
 .MuiButton-root {
   text-transform: none!important;
 }
+
+.MuiInput-underline::before {
+  border-bottom-width: 0!important;
+}

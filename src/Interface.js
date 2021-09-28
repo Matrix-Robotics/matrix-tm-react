@@ -14,6 +14,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import Edit from "@material-ui/icons/Edit";
 import PublishIcon from '@material-ui/icons/Publish';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import CreateIcon from '@material-ui/icons/Create';
@@ -26,7 +27,6 @@ import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
-
 const ITEM_HEIGHT = 80;
 
 const useStyles = makeStyles((theme) => ({
@@ -35,6 +35,9 @@ const useStyles = makeStyles((theme) => ({
   },
   classGrid: {
     minHeight: '100vh'
+  },
+  classTitle: {
+    fontSize: '1.2rem'
   },
   cardClass: {
     display: 'flex',
@@ -117,7 +120,14 @@ export default function Interface() {
       'Disable Class',
       'Remove All Samples'
     ];
-    
+
+    const [classTitle, setClassTitle] = React.useState();
+    const [isNameFocused, setIsNamedFocused] = React.useState(false);
+
+    React.useEffect(() => {
+      setClassTitle("Class " + props.cardId);
+    },[props.cardId]);
+
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
@@ -136,8 +146,9 @@ export default function Interface() {
       let tempList = props.list.slice();
       switch (opt) {
         case 'Delete Class':
-          // console.log(tempList);
+          console.log(tempList);
           let index = tempList.indexOf(props.cardId);
+          // console.log("indexOf cardId: " + index );
           tempList.splice(index, 1);
           handleList(tempList);
           break
@@ -183,7 +194,35 @@ export default function Interface() {
                   </Menu>
                 </div>
               }
-              title={"Class " + props.cardId}
+              title={!isNameFocused ? (
+                  <Typography
+                    className={classes.classTitle}
+                    onClick={() => {
+                      setIsNamedFocused(true);
+                    }}
+                  >
+                    {classTitle}
+                    <IconButton aria-label="settings" onClick={() => {
+                        setIsNamedFocused(true)}}>
+                      <Edit />
+                    </IconButton>
+                  </Typography>
+              ) : (
+                <TextField
+                  autoFocus
+                  inputProps={{ className: classes.classTitle}}
+                  value={classTitle}
+                  onKeyDown={
+                    event => { 
+                      if (event.key === 'Enter') {
+                        setIsNamedFocused(false)
+                      }
+                    }
+                  }
+                  onBlur={event => setIsNamedFocused(false)}
+                  onChange={event => setClassTitle(event.target.value)}
+                />
+              )}
             />
             <CardContent className={classes.cardContent}>
               <Typography>
