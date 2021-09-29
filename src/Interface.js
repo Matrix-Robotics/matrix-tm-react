@@ -225,11 +225,6 @@ export default function Interface() {
                 />
               )}
             />
-            <CardContent className={classes.cardContent}>
-              <Typography>
-                Add Image Samples:
-              </Typography>
-            </CardContent>
             <CardActions className={classes.cardButton}>
               <Capture key={props.cardId} cardId={props.cardId} />
             </CardActions>
@@ -263,7 +258,7 @@ export default function Interface() {
         <Card style={{ width: width }} className={classes.cardCenter} >
           <CardHeader classes="title" title="Training" />
           <CardActions className={classes.cardButton}>
-            <Button variant="contained" size="medium" fullWidth="true">
+            <Button variant="contained" size="medium" fullWidth="true" disableElevation>
               Train Model
             </Button>
           </CardActions>
@@ -313,10 +308,10 @@ export default function Interface() {
                     size="small"
                   />
                 </div>
-                <Button size="small" color="primary" endIcon={<RotateLeftIcon />}>
+                <Button size="small" color="primary" endIcon={<RotateLeftIcon />} disableElevation>
                   Reset Default
                 </Button>
-                <Button size="small" color="primary" endIcon={<AssessmentOutlinedIcon />}>
+                <Button size="small" color="primary" endIcon={<AssessmentOutlinedIcon />} disableElevation>
                   Graph
                 </Button>
               </form>
@@ -333,7 +328,7 @@ export default function Interface() {
       <React.Fragment>
         <Card style={{ width: width }} className={classes.cardCenter}>
           <CardHeader title="Preview" action={
-            <Button variant="contained" size="large" fullWidth="true" startIcon={<PublishIcon />}>
+            <Button variant="contained" size="large" fullWidth="true" startIcon={<PublishIcon />} disableElevation>
               Export Model
             </Button>
           } />
