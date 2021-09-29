@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
     minHeight: '100vh'
   },
   classTitle: {
-    fontSize: '1.2rem'
+    fontSize: '1.4rem'
   },
   cardClass: {
     display: 'flex',
@@ -81,27 +81,27 @@ export default function Interface() {
   const classes = useStyles();
 
   function ClassColumn() {
-    const [list,setList] = React.useState([
+    const [list, setList] = React.useState([
       1,
       2
     ]);
 
     const onAddClassBtnClick = () => {
-      if(list.length) {
-        setList([...list, list.at(-1)+1 ]);
+      if (list.length) {
+        setList([...list, list.at(-1) + 1]);
       } else {
         setList([1]);
       }
     };
-    
+
     const handleList = (newList) => {
       setList(newList);
     }
-  
+
     return (
       <React.Fragment>
         {list.map((value) => (
-          <ClassCard cardId={value} list={list} onChange={handleList}/>
+          <ClassCard key={value} cardId={value} list={list} onChange={handleList} />
         ))}
         <Grid item xs={12}>
           <Card className={classes.cardClass}>
@@ -126,14 +126,14 @@ export default function Interface() {
 
     React.useEffect(() => {
       setClassTitle("Class " + props.cardId);
-    },[props.cardId]);
+    }, [props.cardId]);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
       setAnchorEl(event.currentTarget);
     };
-  
+
     const handleClose = () => {
       setAnchorEl(null);
     };
@@ -146,7 +146,7 @@ export default function Interface() {
       let tempList = props.list.slice();
       switch (opt) {
         case 'Delete Class':
-          console.log(tempList);
+          // console.log(tempList);
           let index = tempList.indexOf(props.cardId);
           // console.log("indexOf cardId: " + index );
           tempList.splice(index, 1);
@@ -195,25 +195,26 @@ export default function Interface() {
                 </div>
               }
               title={!isNameFocused ? (
-                  <Typography
-                    className={classes.classTitle}
-                    onClick={() => {
-                      setIsNamedFocused(true);
-                    }}
-                  >
-                    {classTitle}
-                    <IconButton aria-label="settings" onClick={() => {
-                        setIsNamedFocused(true)}}>
-                      <Edit />
-                    </IconButton>
-                  </Typography>
+                <Typography
+                  className={classes.classTitle}
+                  onClick={() => {
+                    setIsNamedFocused(true);
+                  }}
+                >
+                  {classTitle}
+                  <IconButton aria-label="settings" onClick={() => {
+                    setIsNamedFocused(true)
+                  }}>
+                    <Edit />
+                  </IconButton>
+                </Typography>
               ) : (
                 <TextField
                   autoFocus
-                  inputProps={{ className: classes.classTitle}}
+                  inputProps={{ className: classes.classTitle }}
                   value={classTitle}
                   onKeyDown={
-                    event => { 
+                    event => {
                       if (event.key === 'Enter') {
                         setIsNamedFocused(false)
                       }
@@ -230,7 +231,7 @@ export default function Interface() {
               </Typography>
             </CardContent>
             <CardActions className={classes.cardButton}>
-              <Capture />
+              <Capture key={props.cardId} cardId={props.cardId} />
             </CardActions>
           </Card>
         </Grid>
@@ -240,13 +241,13 @@ export default function Interface() {
 
   const trainGrid = React.useRef(null);
   const previewGrid = React.useRef(null);
-  
+
   function useParentWidthSize(porps) {
     const [width, setWidth] = React.useState();
     React.useEffect(() => {
       let temp = getComputedStyle(porps.parentNode.current)
       function updateSize() {
-        setWidth(porps.parentNode.current.clientWidth- parseFloat(temp.paddingLeft) - parseFloat(temp.paddingRight));
+        setWidth(porps.parentNode.current.clientWidth - parseFloat(temp.paddingLeft) - parseFloat(temp.paddingRight));
       }
       window.addEventListener('resize', updateSize);
       updateSize();
@@ -259,7 +260,7 @@ export default function Interface() {
     const width = useParentWidthSize(props);
     return (
       <React.Fragment>
-        <Card style={{width: width}} className={classes.cardCenter} >
+        <Card style={{ width: width }} className={classes.cardCenter} >
           <CardHeader classes="title" title="Training" />
           <CardActions className={classes.cardButton}>
             <Button variant="contained" size="medium" fullWidth="true">
@@ -330,12 +331,12 @@ export default function Interface() {
     const width = useParentWidthSize(props);
     return (
       <React.Fragment>
-        <Card style={{width: width}} className={classes.cardCenter}>
+        <Card style={{ width: width }} className={classes.cardCenter}>
           <CardHeader title="Preview" action={
             <Button variant="contained" size="large" fullWidth="true" startIcon={<PublishIcon />}>
               Export Model
             </Button>
-          }/>
+          } />
           <CardContent className={classes.cardContent}>
             <Typography>
               You can preview the result here after training a model on the left.
@@ -356,10 +357,10 @@ export default function Interface() {
               <ClassColumn />
             </Grid>
             <Grid item ref={trainGrid} key={2} xs={12} sm={6} md={2}>
-              <TrainColumn parentNode={trainGrid}/>
+              <TrainColumn parentNode={trainGrid} />
             </Grid>
             <Grid item ref={previewGrid} key={3} xs={12} sm={6} md={4}>
-              <PreviewColumn parentNode={previewGrid}/>
+              <PreviewColumn parentNode={previewGrid} />
             </Grid>
           </Grid>
         </Container>
