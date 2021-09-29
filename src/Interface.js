@@ -1,4 +1,5 @@
 import React from 'react';
+import Capture from './Capture.js';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
@@ -16,11 +17,10 @@ import Typography from '@material-ui/core/Typography';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Edit from "@material-ui/icons/Edit";
 import PublishIcon from '@material-ui/icons/Publish';
-import NoteAddIcon from '@material-ui/icons/NoteAdd';
-import CreateIcon from '@material-ui/icons/Create';
+
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 import AssessmentOutlinedIcon from '@material-ui/icons/AssessmentOutlined';
-import VideocamOutlinedIcon from '@material-ui/icons/VideocamOutlined';
+
 import IconButton from '@material-ui/core/IconButton';
 import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 import Grid from '@material-ui/core/Grid';
@@ -230,15 +230,7 @@ export default function Interface() {
               </Typography>
             </CardContent>
             <CardActions className={classes.cardButton}>
-              <Button variant="contained" size="large" startIcon={<VideocamOutlinedIcon />}>
-                Webcam
-              </Button>
-              <Button variant="contained" size="large" startIcon={<CreateIcon />}>
-                Draw
-              </Button>
-              <Button variant="contained" size="large" startIcon={<NoteAddIcon />}>
-                Upload
-              </Button>
+              <Capture />
             </CardActions>
           </Card>
         </Grid>
