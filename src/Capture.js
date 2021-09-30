@@ -9,8 +9,8 @@ import ImageList from '@material-ui/core/ImageList';
 import ImageListItem from '@material-ui/core/ImageListItem';
 import GestureIcon from '@material-ui/icons/Gesture';
 import VideocamOutlinedIcon from '@material-ui/icons/VideocamOutlined';
-
 import { makeStyles } from '@material-ui/core/styles';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -19,9 +19,7 @@ const useStyles = makeStyles((theme) => ({
   imageList: {
     transform: 'translateZ(0)',
   },
-
 }));
-
 
 function WebcamCapture(props) {
   const webcamRef = React.useRef(null);
@@ -40,6 +38,7 @@ function WebcamCapture(props) {
       <Webcam
         audio={false}
         ref={webcamRef}
+        id="webcam"
         screenshotFormat="image/jpeg"
         forceScreenshotSourceSize="true"
         style={{
@@ -59,6 +58,10 @@ export default function Capture(props) {
   const classes = useStyles();
 
   const [selectedFiles, setSelectedFiles] = React.useState([]);
+
+  // React.useEffect(() => {
+  //   props.onTrain(selectedFiles);
+  // });
 
   const handleUpload = (e, src) => {
     if (e.target.files) {
@@ -86,7 +89,7 @@ export default function Capture(props) {
           <Typography>
             Add Image Samples:
           </Typography>
-          <ImageList className={classes.imageList} rowHeight={100} cols={5}>
+          <ImageList className={classes.imageList} rowHeight={80} cols={4}>
             {selectedFiles.map((item) => (
               <ImageListItem key={item} cols={item.cols || 1}>
                 <img src={item} alt={item.title} />

@@ -17,15 +17,15 @@ import Typography from '@material-ui/core/Typography';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Edit from "@material-ui/icons/Edit";
 import PublishIcon from '@material-ui/icons/Publish';
-
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 import AssessmentOutlinedIcon from '@material-ui/icons/AssessmentOutlined';
-
 import IconButton from '@material-ui/core/IconButton';
 import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+
+import train from './train.js';
 
 const ITEM_HEIGHT = 80;
 
@@ -79,13 +79,20 @@ const useStyles = makeStyles((theme) => ({
 export default function Interface() {
 
   const classes = useStyles();
+  const trainGrid = React.useRef(null);
+  const previewGrid = React.useRef(null);
+
+  
+
+  const [classListState, setClassListState] = React.useState ([]);
 
   function ClassColumn() {
+
     const [list, setList] = React.useState([
       1,
       2
     ]);
-
+    
     const onAddClassBtnClick = () => {
       if (list.length) {
         setList([...list, list.at(-1) + 1]);
@@ -124,6 +131,12 @@ export default function Interface() {
     const [classTitle, setClassTitle] = React.useState();
     const [isNameFocused, setIsNamedFocused] = React.useState(false);
 
+
+    // let tempArray = []
+    const handleTrain = (array) => {
+      console.log(array);
+    }
+  
     React.useEffect(() => {
       setClassTitle("Class " + props.cardId);
     }, [props.cardId]);
@@ -226,6 +239,7 @@ export default function Interface() {
               )}
             />
             <CardActions className={classes.cardButton}>
+            {/* <Capture key={props.cardId} cardId={props.cardId} onTrain={handleTrain}/> */}
               <Capture key={props.cardId} cardId={props.cardId} />
             </CardActions>
           </Card>
@@ -233,9 +247,6 @@ export default function Interface() {
       </React.Fragment>
     );
   };
-
-  const trainGrid = React.useRef(null);
-  const previewGrid = React.useRef(null);
 
   function useParentWidthSize(porps) {
     const [width, setWidth] = React.useState();
@@ -253,6 +264,7 @@ export default function Interface() {
 
   function TrainColumn(props) {
     const width = useParentWidthSize(props);
+    
     return (
       <React.Fragment>
         <Card style={{ width: width }} className={classes.cardCenter} >

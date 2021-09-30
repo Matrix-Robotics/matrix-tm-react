@@ -1,0 +1,64 @@
+import * as tf from '@tensorflow/tfjs';
+import * as mobilenet from '@tensorflow-models/mobilenet';
+import * as knnClassifier from '@tensorflow-models/knn-classifier';
+
+
+let net;
+
+const classifier = knnClassifier.create();
+
+const webcamElement = document.getElementById('webcam');
+
+export default async function train(array) {
+  console.log('Loading mobilenet..');
+
+  // Load the model.
+  net = await mobilenet.load();
+  console.log('Successfully loaded model');
+
+  // Create an object from Tensorflow.js data API which could capture image 
+  // from the web camera as Tensor.
+  const webcam = await tf.data.webcam(webcamElement);
+
+  // Reads an image from the webcam and associates it with a specific class
+  // index.
+  const addExample = async (imgSrc, index) => {
+    // Capture an image from the web camera.
+    // const img = await webcam.capture();
+
+    // Get the intermediate activation of MobileNet 'conv_preds' and pass that
+    // to the KNN classifier.
+    const activation = net.infer(imgSrc, true);
+
+    // Pass the intermediate activation to the classifier.
+    classifier.addExample(activation, index);
+
+    // Dispose the tensor to release the memory.
+    // img.dispose();
+  };
+
+  array.forEach((imgSrc, index) => addExample(imgSrc, index));
+
+
+  while (true) {
+    if (classifier.getNumClasses() > 0) {
+      const img = await webcam.capture();
+
+      // Get the activation from mobilenet from the webcam.
+      const activation = net.infer(img, 'conv_preds');
+      // Get the most likely class and confidence from the classifier module.
+      const result = await classifier.predictClass(activation);
+
+      const classes = ['A', 'B', 'C'];
+      document.getElementById('console').innerText = `
+        prediction: ${classes[result.label]}\n
+        probability: ${result.confidences[result.label]}
+      `;
+
+      // Dispose the tensor to release the memory.
+      img.dispose();
+    }
+
+    await tf.nextFrame();
+  }
+}
