@@ -82,33 +82,54 @@ export default function Interface() {
   const trainGrid = React.useRef(null);
   const previewGrid = React.useRef(null);
 
+  const [cards, setCards] = React.useState([
+    {
+      cardId: 1,
+      title: 'Class ' + 1,
+      imageList: []
+    },
+    {
+      cardId: 2,
+      title: 'Class ' + 2,
+      imageList: []
+    }
+  ]);
+
+  const [classTitle, setClassTitle] = React.useState([]);
+  const [list, setList] = React.useState([
+    1,
+    2
+  ]);
   
 
-  const [classListState, setClassListState] = React.useState ([]);
+  // // let tempArray = []
+  // const handleTrain = () => {
+  //   // console.log("test");
+  // }
 
   function ClassColumn() {
 
-    const [list, setList] = React.useState([
-      1,
-      2
-    ]);
-    
     const onAddClassBtnClick = () => {
-      if (list.length) {
-        setList([...list, list.at(-1) + 1]);
+      let tempCards = [...cards];
+      if (tempCards.length) {
+        setCards([...tempCards, tempCards.at(-1).cardId + 1]);
       } else {
-        setList([1]);
+        setCards([{
+          cardId: 1,
+          title: 'Class ' + 1,
+          imageList: []
+        }]);
       }
     };
 
-    const handleList = (newList) => {
-      setList(newList);
+    const handleCards = (newCards) => {
+      setCards(newCards);
     }
 
     return (
       <React.Fragment>
-        {list.map((value) => (
-          <ClassCard key={value} cardId={value} list={list} onChange={handleList} />
+        {cards.map((card, index) => (
+          <ClassCard key={card.cardId} cardId={card.cardId} cards={cards} title={card.title} onChange={handleCards} />
         ))}
         <Grid item xs={12}>
           <Card className={classes.cardClass}>
@@ -128,18 +149,8 @@ export default function Interface() {
       'Remove All Samples'
     ];
 
-    const [classTitle, setClassTitle] = React.useState();
+    
     const [isNameFocused, setIsNamedFocused] = React.useState(false);
-
-
-    // let tempArray = []
-    const handleTrain = (array) => {
-      console.log(array);
-    }
-  
-    React.useEffect(() => {
-      setClassTitle("Class " + props.cardId);
-    }, [props.cardId]);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
@@ -151,19 +162,17 @@ export default function Interface() {
       setAnchorEl(null);
     };
 
-    const handleList = (list) => {
-      props.onChange(list);
+    const handleCards = (card) => {
+      props.onChange(card);
     }
 
     const handleOpe = (opt) => {
-      let tempList = props.list.slice();
+      let tempCards = [...cards];
       switch (opt) {
         case 'Delete Class':
-          // console.log(tempList);
-          let index = tempList.indexOf(props.cardId);
-          // console.log("indexOf cardId: " + index );
-          tempList.splice(index, 1);
-          handleList(tempList);
+          let index = tempCards.map(card => card.cardId).indexOd(props.cardId);
+          tempCards.splice(index, 1);
+          handleCards(tempCards);
           break
         case 'Disable Class':
           break
@@ -214,7 +223,7 @@ export default function Interface() {
                     setIsNamedFocused(true);
                   }}
                 >
-                  {classTitle}
+                  {props.title}
                   <IconButton aria-label="settings" onClick={() => {
                     setIsNamedFocused(true)
                   }}>
@@ -225,7 +234,7 @@ export default function Interface() {
                 <TextField
                   autoFocus
                   inputProps={{ className: classes.classTitle }}
-                  value={classTitle}
+                  value={props.title}
                   onKeyDown={
                     event => {
                       if (event.key === 'Enter') {
@@ -234,7 +243,10 @@ export default function Interface() {
                     }
                   }
                   onBlur={event => setIsNamedFocused(false)}
-                  onChange={event => setClassTitle(event.target.value)}
+                  onChange={event => {
+                    let prevArray = classTitle.slice();
+                    prevArray[props.cardId] = event.target.value;
+                    setClassTitle(prevArray)}}
                 />
               )}
             />

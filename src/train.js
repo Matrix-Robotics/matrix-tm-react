@@ -20,9 +20,10 @@ export default async function train(array) {
   // from the web camera as Tensor.
   const webcam = await tf.data.webcam(webcamElement);
 
+  
   // Reads an image from the webcam and associates it with a specific class
   // index.
-  const addExample = async (imgSrc, index) => {
+  const addExample = async (cardId, imgSrc) => {
     // Capture an image from the web camera.
     // const img = await webcam.capture();
 
@@ -31,13 +32,13 @@ export default async function train(array) {
     const activation = net.infer(imgSrc, true);
 
     // Pass the intermediate activation to the classifier.
-    classifier.addExample(activation, index);
+    classifier.addExample(activation, cardId);
 
     // Dispose the tensor to release the memory.
     // img.dispose();
   };
 
-  array.forEach((imgSrc, index) => addExample(imgSrc, index));
+  array.forEach((cardId, imgSrc) => addExample(cardId, imgSrc));
 
 
   while (true) {

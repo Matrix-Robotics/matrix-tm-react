@@ -59,10 +59,6 @@ export default function Capture(props) {
 
   const [selectedFiles, setSelectedFiles] = React.useState([]);
 
-  // React.useEffect(() => {
-  //   props.onTrain(selectedFiles);
-  // });
-
   const handleUpload = (e, src) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files).map(
@@ -77,6 +73,10 @@ export default function Capture(props) {
       setSelectedFiles((prevImages) => prevImages.concat(src));
     }
   };
+
+  const handleTrain = (selectedFiles) => {
+    props.onTrain(selectedFiles);
+  }
 
   const [toggleWebcam, setToggleWebcam] = React.useState(false);
   const handleToggle = () => setToggleWebcam(!toggleWebcam);
