@@ -95,24 +95,18 @@ export default function Interface() {
     }
   ]);
 
-  const [classTitle, setClassTitle] = React.useState([]);
-  const [list, setList] = React.useState([
-    1,
-    2
-  ]);
-  
-
-  // // let tempArray = []
-  // const handleTrain = () => {
-  //   // console.log("test");
-  // }
-
   function ClassColumn() {
 
     const onAddClassBtnClick = () => {
       let tempCards = [...cards];
       if (tempCards.length) {
-        setCards([...tempCards, tempCards.at(-1).cardId + 1]);
+        let newCardId = tempCards.at(-1).cardId + 1;
+        let newCard = {
+          cardId: newCardId,
+          title: 'Class ' + newCardId,
+          imageList: []
+        };
+        setCards([...tempCards, newCard]);
       } else {
         setCards([{
           cardId: 1,
@@ -148,9 +142,9 @@ export default function Interface() {
       'Disable Class',
       'Remove All Samples'
     ];
-
     
-    const [isNameFocused, setIsNamedFocused] = React.useState(false);
+    const [cardTitle, setCardTitle] = React.useState();
+    const [isTitleFocused, setIsTitleFocused] = React.useState(false);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
@@ -166,11 +160,20 @@ export default function Interface() {
       props.onChange(card);
     }
 
+    const handleTitle = (e) => {
+      let tempCards = [...cards];
+      let index = tempCards.map(card => card.cardId).indexOf(props.cardId);
+      tempCards[index].title = e.currentTarget.value;
+      setCards(tempCards);
+      setIsTitleFocused(false);
+    }
+
     const handleOpe = (opt) => {
       let tempCards = [...cards];
       switch (opt) {
         case 'Delete Class':
-          let index = tempCards.map(card => card.cardId).indexOd(props.cardId);
+          let index = tempCards.map(card => card.cardId).indexOf(props.cardId);
+          console.log(index);
           tempCards.splice(index, 1);
           handleCards(tempCards);
           break
@@ -216,16 +219,16 @@ export default function Interface() {
                   </Menu>
                 </div>
               }
-              title={!isNameFocused ? (
+              title={!isTitleFocused ? (
                 <Typography
                   className={classes.classTitle}
                   onClick={() => {
-                    setIsNamedFocused(true);
+                    setIsTitleFocused(true);
                   }}
                 >
                   {props.title}
                   <IconButton aria-label="settings" onClick={() => {
-                    setIsNamedFocused(true)
+                    setIsTitleFocused(true)
                   }}>
                     <Edit />
                   </IconButton>
@@ -238,15 +241,12 @@ export default function Interface() {
                   onKeyDown={
                     event => {
                       if (event.key === 'Enter') {
-                        setIsNamedFocused(false)
+                        handleTitle()
                       }
                     }
                   }
-                  onBlur={event => setIsNamedFocused(false)}
-                  onChange={event => {
-                    let prevArray = classTitle.slice();
-                    prevArray[props.cardId] = event.target.value;
-                    setClassTitle(prevArray)}}
+                  onBlur={e => setIsTitleFocused(false)}
+                  onChange={e => handleTitle(e)}
                 />
               )}
             />
