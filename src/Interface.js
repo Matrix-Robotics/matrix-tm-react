@@ -146,6 +146,11 @@ export default function Interface() {
     const [cardTitle, setCardTitle] = React.useState();
     const [isTitleFocused, setIsTitleFocused] = React.useState(false);
 
+    React.useLayoutEffect(() => {
+      setCardTitle(props.title);
+    },[props.title]);
+
+
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
@@ -164,7 +169,7 @@ export default function Interface() {
       let tempCards = [...cards];
       let index = tempCards.map(card => card.cardId).indexOf(props.cardId);
       tempCards[index].title = e.currentTarget.value;
-      setCards(tempCards);
+      handleCards(tempCards);
       setIsTitleFocused(false);
     }
 
@@ -226,7 +231,7 @@ export default function Interface() {
                     setIsTitleFocused(true);
                   }}
                 >
-                  {props.title}
+                  {cardTitle}
                   <IconButton aria-label="settings" onClick={() => {
                     setIsTitleFocused(true)
                   }}>
@@ -237,16 +242,15 @@ export default function Interface() {
                 <TextField
                   autoFocus
                   inputProps={{ className: classes.classTitle }}
-                  value={props.title}
-                  onKeyDown={
-                    event => {
-                      if (event.key === 'Enter') {
-                        handleTitle()
+                  value={cardTitle}
+                  onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        handleTitle(e)
                       }
                     }
                   }
-                  onBlur={e => setIsTitleFocused(false)}
-                  onChange={e => handleTitle(e)}
+                  onBlur={e => handleTitle(e)}
+                  onChange={e => setCardTitle(e.currentTarget.value)}
                 />
               )}
             />
