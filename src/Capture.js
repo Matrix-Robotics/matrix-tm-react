@@ -60,14 +60,11 @@ export default function Capture(props) {
   const [selectedFiles, setSelectedFiles] = React.useState([]);
 
   React.useEffect(() => {
-    // props.captureEl.current = handleImageList;
+    if (props.captureEl) {
+      props.captureEl.current = handleImageList;
+    }
   })
   
-  // React.useEffect(() => {
-  //   console.log(selectedFiles);
-  //   console.log("'undefined' ?? =" + (typeof selectedFiles === 'undefined'));
-  // }, [props.imageList, selectedFiles])
-
   const handleUpload = (e, src) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files).map(
@@ -84,7 +81,6 @@ export default function Capture(props) {
   };
 
   const handleImageList = () => {
-    console.log("test");
     props.onChange(selectedFiles);
   };
 
@@ -109,7 +105,6 @@ export default function Capture(props) {
                
               </ImageListItem>
             )}
-            {console.log("this is: " + props.cardId)}
           </ImageList>
         </Grid>
       </Grid>

@@ -84,6 +84,7 @@ export default function Interface() {
   const trainGrid = React.useRef(null);
   const previewGrid = React.useRef(null);
 
+  
   // const [triggerTrain, setTriggerTrain] = React.useState(false);
   const [cards, setCards] = React.useState([
     {
@@ -97,6 +98,12 @@ export default function Interface() {
       imageList: []
     }
   ]);
+
+  React.useEffect(() => {
+    if (captureElList.current.length !== cards.length) {
+      captureElList.current = Array(cards.length).fill().map((_, i) => captureElList.current[i] || React.createRef());
+    }
+  })
 
   function ClassColumn() {
 
@@ -123,13 +130,6 @@ export default function Interface() {
       setCards(newCards);
     }
 
-    React.useEffect(() => {
-      console.log(captureElList.current);
-      if (captureElList.current.length !== cards.length) {
-        // add or remove refs
-        captureElList.current = Array(cards.length).fill().map((_, i) => captureElList.current[i] || React.createRef());
-      }
-    })
 
     return (
       <React.Fragment>
@@ -191,8 +191,6 @@ export default function Interface() {
       let index = tempCards.map(card => card.cardId).indexOf(props.cardId);
       tempCards[index].imageList = imageList;
       handleCards(tempCards);
-      console.log("index= " + index);
-      console.log(cards);
     }
 
     const handleOpe = (opt) => {
@@ -200,7 +198,6 @@ export default function Interface() {
       switch (opt) {
         case 'Delete Class':
           let index = tempCards.map(card => card.cardId).indexOf(props.cardId);
-          console.log(index);
           tempCards.splice(index, 1);
           handleCards(tempCards);
           break
@@ -308,7 +305,7 @@ export default function Interface() {
         <Card style={{ width: width }} className={classes.cardCenter} >
           <CardHeader classes="title" title="Training" />
           <CardActions className={classes.cardButton}>
-            <Button variant="contained" size="medium" fullWidth="true" onClick={() => console.log(props.captureEl)} disableElevation>
+            <Button variant="contained" size="medium" fullWidth="true" onClick={() => props.captureEl.current.forEach(f => f.current())} disableElevation>
               Train Model
             </Button>
           </CardActions>
