@@ -59,6 +59,15 @@ export default function Capture(props) {
 
   const [selectedFiles, setSelectedFiles] = React.useState([]);
 
+  React.useEffect(() => {
+    // props.captureEl.current = handleImageList;
+  })
+  
+  // React.useEffect(() => {
+  //   console.log(selectedFiles);
+  //   console.log("'undefined' ?? =" + (typeof selectedFiles === 'undefined'));
+  // }, [props.imageList, selectedFiles])
+
   const handleUpload = (e, src) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files).map(
@@ -74,9 +83,10 @@ export default function Capture(props) {
     }
   };
 
-  const handleTrain = (selectedFiles) => {
-    props.onTrain(selectedFiles);
-  }
+  const handleImageList = () => {
+    console.log("test");
+    props.onChange(selectedFiles);
+  };
 
   const [toggleWebcam, setToggleWebcam] = React.useState(false);
   const handleToggle = () => setToggleWebcam(!toggleWebcam);
@@ -84,17 +94,21 @@ export default function Capture(props) {
   return (
     <Box className={classes.root} key={props.cardId}>
       <Grid container spacing={2} direction="row" justifyContent="space-between" alignItems="flex-start" >
-          {toggleWebcam ? <Grid item xs={6}><WebcamCapture onChange={handleUpload}/></Grid> : null}
+          {toggleWebcam ? <Grid item xs={6}><WebcamCapture onChange={handleUpload} /></Grid> : null}
         <Grid item xs={6} overflow="visible" >
           <Typography>
             Add Image Samples:
           </Typography>
           <ImageList className={classes.imageList} rowHeight={80} cols={4}>
-            {selectedFiles.map((item) => (
+            {!(typeof selectedFiles === 'undefined')? (selectedFiles.map((item) => (
               <ImageListItem key={item} cols={item.cols || 1}>
                 <img src={item} alt={item.title} />
               </ImageListItem>
-            ))}
+            ))) : (
+              <ImageListItem >
+               
+              </ImageListItem>
+            )}
             {console.log("this is: " + props.cardId)}
           </ImageList>
         </Grid>

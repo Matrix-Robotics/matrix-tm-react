@@ -25,7 +25,7 @@ import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
-import train from './train.js';
+// import train from './train.js';
 
 const ITEM_HEIGHT = 80;
 
@@ -79,9 +79,12 @@ const useStyles = makeStyles((theme) => ({
 export default function Interface() {
 
   const classes = useStyles();
+  
+  const captureElList = React.useRef([]);
   const trainGrid = React.useRef(null);
   const previewGrid = React.useRef(null);
 
+  // const [triggerTrain, setTriggerTrain] = React.useState(false);
   const [cards, setCards] = React.useState([
     {
       cardId: 1,
@@ -120,10 +123,18 @@ export default function Interface() {
       setCards(newCards);
     }
 
+    React.useEffect(() => {
+      console.log(captureElList.current);
+      if (captureElList.current.length !== cards.length) {
+        // add or remove refs
+        captureElList.current = Array(cards.length).fill().map((_, i) => captureElList.current[i] || React.createRef());
+      }
+    })
+
     return (
       <React.Fragment>
         {cards.map((card, index) => (
-          <ClassCard key={card.cardId} cardId={card.cardId} cards={cards} title={card.title} onChange={handleCards} />
+          <ClassCard key={card.cardId} cardId={card.cardId} cards={cards} title={card.title} imageList={card.imageList} onChange={handleCards} />
         ))}
         <Grid item xs={12}>
           <Card className={classes.cardClass}>
@@ -144,11 +155,13 @@ export default function Interface() {
     ];
     
     const [cardTitle, setCardTitle] = React.useState();
+    const [cardImageList, setCardImageList] = React.useState([]);
     const [isTitleFocused, setIsTitleFocused] = React.useState(false);
 
     React.useLayoutEffect(() => {
       setCardTitle(props.title);
-    },[props.title]);
+      setCardImageList(props.imageList);
+    },[props.title, props.imageList]);
 
 
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -161,8 +174,8 @@ export default function Interface() {
       setAnchorEl(null);
     };
 
-    const handleCards = (card) => {
-      props.onChange(card);
+    const handleCards = (cards) => {
+      props.onChange(cards);
     }
 
     const handleTitle = (e) => {
@@ -171,6 +184,15 @@ export default function Interface() {
       tempCards[index].title = e.currentTarget.value;
       handleCards(tempCards);
       setIsTitleFocused(false);
+    }
+
+    const handleImageList = (imageList) => {
+      let tempCards = [...cards];
+      let index = tempCards.map(card => card.cardId).indexOf(props.cardId);
+      tempCards[index].imageList = imageList;
+      handleCards(tempCards);
+      console.log("index= " + index);
+      console.log(cards);
     }
 
     const handleOpe = (opt) => {
@@ -256,7 +278,7 @@ export default function Interface() {
             />
             <CardActions className={classes.cardButton}>
             {/* <Capture key={props.cardId} cardId={props.cardId} onTrain={handleTrain}/> */}
-              <Capture key={props.cardId} cardId={props.cardId} />
+              <Capture captureEl={captureElList.current[cards.map(card => card.cardId).indexOf(props.cardId)]} key={props.cardId} cardId={props.cardId} imageList={cardImageList} onChange={handleImageList} />
             </CardActions>
           </Card>
         </Grid>
@@ -286,7 +308,7 @@ export default function Interface() {
         <Card style={{ width: width }} className={classes.cardCenter} >
           <CardHeader classes="title" title="Training" />
           <CardActions className={classes.cardButton}>
-            <Button variant="contained" size="medium" fullWidth="true" disableElevation>
+            <Button variant="contained" size="medium" fullWidth="true" onClick={() => console.log(props.captureEl)} disableElevation>
               Train Model
             </Button>
           </CardActions>
@@ -380,7 +402,7 @@ export default function Interface() {
               <ClassColumn />
             </Grid>
             <Grid item ref={trainGrid} key={2} xs={12} sm={6} md={2}>
-              <TrainColumn parentNode={trainGrid} />
+              <TrainColumn captureEl={captureElList} parentNode={trainGrid} />
             </Grid>
             <Grid item ref={previewGrid} key={3} xs={12} sm={6} md={4}>
               <PreviewColumn parentNode={previewGrid} />
