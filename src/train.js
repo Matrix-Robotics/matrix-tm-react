@@ -7,9 +7,9 @@ let net;
 
 const classifier = knnClassifier.create();
 
-const webcamElement = document.getElementById('webcam');
+// const webcamElement = document.getElementById('webcam');
 
-export default async function train(array) {
+export default async function train(cards) {
   console.log('Loading mobilenet..');
 
   // Load the model.
@@ -18,7 +18,7 @@ export default async function train(array) {
 
   // Create an object from Tensorflow.js data API which could capture image 
   // from the web camera as Tensor.
-  const webcam = await tf.data.webcam(webcamElement);
+  // const webcam = await tf.data.webcam(webcamElement);
 
   
   // Reads an image from the webcam and associates it with a specific class
@@ -38,28 +38,33 @@ export default async function train(array) {
     // img.dispose();
   };
 
-  array.forEach((cardId, imgSrc) => addExample(cardId, imgSrc));
-
-
-  while (true) {
-    if (classifier.getNumClasses() > 0) {
-      const img = await webcam.capture();
-
-      // Get the activation from mobilenet from the webcam.
-      const activation = net.infer(img, 'conv_preds');
-      // Get the most likely class and confidence from the classifier module.
-      const result = await classifier.predictClass(activation);
-
-      const classes = ['A', 'B', 'C'];
-      document.getElementById('console').innerText = `
-        prediction: ${classes[result.label]}\n
-        probability: ${result.confidences[result.label]}
-      `;
-
-      // Dispose the tensor to release the memory.
-      img.dispose();
+  cards.forEach(card => {
+    let tempImageList = card.imageList;
+    if(typeof tempImageList !== 'undefined' && tempImageList.length > 0) {
+      tempImageList.forEach(image => addExample(card.title, image));
     }
+  });
 
-    await tf.nextFrame();
-  }
+
+  // while (true) {
+  //   if (classifier.getNumClasses() > 0) {
+  //     const img = await webcam.capture();
+
+  //     // Get the activation from mobilenet from the webcam.
+  //     const activation = net.infer(img, 'conv_preds');
+  //     // Get the most likely class and confidence from the classifier module.
+  //     const result = await classifier.predictClass(activation);
+
+  //     const classes = ['A', 'B', 'C'];
+  //     document.getElementById('console').innerText = `
+  //       prediction: ${classes[result.label]}\n
+  //       probability: ${result.confidences[result.label]}
+  //     `;
+
+  //     // Dispose the tensor to release the memory.
+  //     img.dispose();
+  //   }
+
+  //   await tf.nextFrame();
+  // }
 }

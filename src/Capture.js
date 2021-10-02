@@ -76,7 +76,7 @@ export default function Capture(props) {
 
   const handleImageList = React.useCallback(() => {
     props.onChange(selectedFiles);
-    setSelectedFiles(props.imageList)
+    setSelectedFiles(props.imageList);
   }, [props, selectedFiles]);
 
   React.useEffect(() => {

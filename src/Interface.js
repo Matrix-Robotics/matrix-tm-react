@@ -25,7 +25,7 @@ import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
-// import train from './train.js';
+import train from './train.js';
 
 const ITEM_HEIGHT = 80;
 
@@ -302,7 +302,14 @@ export default function Interface() {
         <Card style={{ width: width }} className={classes.cardCenter} >
           <CardHeader title="Training" />
           <CardActions className={classes.cardButton}>
-            <Button variant="contained" size="medium" fullWidth={true} onClick={() => props.captureEl.current.forEach(f => f.current())} disableElevation>
+            <Button variant="contained"
+              size="medium"
+              fullWidth={true}
+              onClick={() => {
+                props.captureEl.current.forEach(f => f.current());
+                train(cards);
+              }}
+              disableElevation>
               Train Model
             </Button>
           </CardActions>
