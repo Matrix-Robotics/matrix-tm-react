@@ -84,8 +84,6 @@ export default function Interface() {
   const trainGrid = React.useRef(null);
   const previewGrid = React.useRef(null);
 
-  
-  // const [triggerTrain, setTriggerTrain] = React.useState(false);
   const [cards, setCards] = React.useState([
     {
       cardId: 1,
@@ -103,7 +101,7 @@ export default function Interface() {
     if (captureElList.current.length !== cards.length) {
       captureElList.current = Array(cards.length).fill().map((_, i) => captureElList.current[i] || React.createRef());
     }
-  })
+  },[captureElList, cards.length])
 
   function ClassColumn() {
 
@@ -130,7 +128,6 @@ export default function Interface() {
       setCards(newCards);
     }
 
-
     return (
       <React.Fragment>
         {cards.map((card, index) => (
@@ -155,14 +152,15 @@ export default function Interface() {
     ];
     
     const [cardTitle, setCardTitle] = React.useState();
-    const [cardImageList, setCardImageList] = React.useState([]);
     const [isTitleFocused, setIsTitleFocused] = React.useState(false);
 
-    React.useLayoutEffect(() => {
-      setCardTitle(props.title);
-      setCardImageList(props.imageList);
-    },[props.title, props.imageList]);
+    const cardTitleRef = React.useRef();
 
+    React.useEffect(() => {
+      if(props.title) {
+        setCardTitle(props.title);
+      }
+    }, [props.title]);
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
@@ -189,9 +187,9 @@ export default function Interface() {
     const handleImageList = (imageList) => {
       let tempCards = [...cards];
       let index = tempCards.map(card => card.cardId).indexOf(props.cardId);
-      tempCards[index].imageList = imageList;
+      tempCards[index].imageList = [...imageList];
       handleCards(tempCards);
-    }
+    };
 
     const handleOpe = (opt) => {
       let tempCards = [...cards];
@@ -261,21 +259,20 @@ export default function Interface() {
                 <TextField
                   autoFocus
                   inputProps={{ className: classes.classTitle }}
+                  inputRef={cardTitleRef}
                   value={cardTitle}
-                  onKeyDown={e => {
-                      if (e.key === 'Enter') {
-                        handleTitle(e)
-                      }
-                    }
-                  }
                   onBlur={e => handleTitle(e)}
                   onChange={e => setCardTitle(e.currentTarget.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      setCardTitle(cardTitleRef.current.value)
+                    }
+                  }}
                 />
               )}
             />
             <CardActions className={classes.cardButton}>
-            {/* <Capture key={props.cardId} cardId={props.cardId} onTrain={handleTrain}/> */}
-              <Capture captureEl={captureElList.current[cards.map(card => card.cardId).indexOf(props.cardId)]} key={props.cardId} cardId={props.cardId} imageList={cardImageList} onChange={handleImageList} />
+              <Capture key={props.cardId} cardId={props.cardId} imageList={props.imageList} captureEl={captureElList.current[cards.map(card => card.cardId).indexOf(props.cardId)]} onChange={handleImageList} />
             </CardActions>
           </Card>
         </Grid>
@@ -303,9 +300,9 @@ export default function Interface() {
     return (
       <React.Fragment>
         <Card style={{ width: width }} className={classes.cardCenter} >
-          <CardHeader classes="title" title="Training" />
+          <CardHeader title="Training" />
           <CardActions className={classes.cardButton}>
-            <Button variant="contained" size="medium" fullWidth="true" onClick={() => props.captureEl.current.forEach(f => f.current())} disableElevation>
+            <Button variant="contained" size="medium" fullWidth={true} onClick={() => props.captureEl.current.forEach(f => f.current())} disableElevation>
               Train Model
             </Button>
           </CardActions>
@@ -375,7 +372,7 @@ export default function Interface() {
       <React.Fragment>
         <Card style={{ width: width }} className={classes.cardCenter}>
           <CardHeader title="Preview" action={
-            <Button variant="contained" size="large" fullWidth="true" startIcon={<PublishIcon />} disableElevation>
+            <Button variant="contained" size="large" fullWidth={true} startIcon={<PublishIcon />} disableElevation>
               Export Model
             </Button>
           } />

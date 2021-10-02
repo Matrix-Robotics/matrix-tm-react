@@ -59,12 +59,6 @@ export default function Capture(props) {
 
   const [selectedFiles, setSelectedFiles] = React.useState([]);
 
-  React.useEffect(() => {
-    if (props.captureEl) {
-      props.captureEl.current = handleImageList;
-    }
-  })
-  
   const handleUpload = (e, src) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files).map(
@@ -80,9 +74,23 @@ export default function Capture(props) {
     }
   };
 
-  const handleImageList = () => {
+  const handleImageList = React.useCallback(() => {
     props.onChange(selectedFiles);
-  };
+    setSelectedFiles(props.imageList)
+  }, [props, selectedFiles]);
+
+  React.useEffect(() => {
+    if (props.captureEl) {
+      props.captureEl.current = handleImageList;
+    }
+  }, [props.captureEl, handleImageList])
+
+  React.useEffect(() => {
+    if(props.imageList) {
+      setSelectedFiles(props.imageList);
+    }
+  }, [props.imageList])
+
 
   const [toggleWebcam, setToggleWebcam] = React.useState(false);
   const handleToggle = () => setToggleWebcam(!toggleWebcam);
@@ -90,20 +98,16 @@ export default function Capture(props) {
   return (
     <Box className={classes.root} key={props.cardId}>
       <Grid container spacing={2} direction="row" justifyContent="space-between" alignItems="flex-start" >
-          {toggleWebcam ? <Grid item xs={6}><WebcamCapture onChange={handleUpload} /></Grid> : null}
+        {toggleWebcam ? <Grid item xs={6}><WebcamCapture onChange={handleUpload} /></Grid> : null}
         <Grid item xs={6} overflow="visible" >
           <Typography>
             Add Image Samples:
           </Typography>
           <ImageList className={classes.imageList} rowHeight={80} cols={4}>
-            {!(typeof selectedFiles === 'undefined')? (selectedFiles.map((item) => (
+            {selectedFiles.map((item) => (
               <ImageListItem key={item} cols={item.cols || 1}>
                 <img src={item} alt={item.title} />
-              </ImageListItem>
-            ))) : (
-              <ImageListItem >
-               
-              </ImageListItem>
+              </ImageListItem>)
             )}
           </ImageList>
         </Grid>
