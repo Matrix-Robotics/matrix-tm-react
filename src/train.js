@@ -59,10 +59,11 @@ export default async function train(cards, webcamEl) {
       const result = await classifier.predictClass(activation);
 
       const classes = ['A', 'B', 'C'];
-      document.getElementById('console').innerText = `
-        prediction: ${classes[result.label]}\n
-        probability: ${result.confidences[result.label]}
-      `;
+      // document.getElementById('console').innerText = `
+      //   prediction: ${classes[result.label]}\n
+      //   probability: ${result.confidences[result.label]}
+      // `;
+      console.log(result)
 
       // Dispose the tensor to release the memory.
       img.dispose();

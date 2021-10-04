@@ -306,8 +306,8 @@ export default function Interface() {
     const handleTrain = () => {
       setIsTrained(true);
       props.captureEl.current.forEach(f => f.current());
-      console.log(previewCamRef.current)
-      train(cards, previewCamRef.current);
+      console.log(webcamEl)
+      train(cards, webcamEl);
     }
 
     return (
