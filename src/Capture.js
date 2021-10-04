@@ -21,6 +21,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+
 function WebcamCapture(props) {
   const webcamRef = React.useRef(null);
 
@@ -41,6 +42,8 @@ function WebcamCapture(props) {
         id="webcam"
         screenshotFormat="image/jpeg"
         forceScreenshotSourceSize="true"
+        height={224}
+        width={224}
         style={{
           width: "100%"
         }}

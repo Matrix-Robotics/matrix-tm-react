@@ -1,5 +1,5 @@
 import React from 'react';
-import Capture from './Capture.js';
+import Webcam from "react-webcam";
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
@@ -25,6 +25,7 @@ import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
+import Capture from './Capture.js';
 import train from './train.js';
 
 const ITEM_HEIGHT = 80;
@@ -83,6 +84,7 @@ export default function Interface() {
   const captureElList = React.useRef([]);
   const trainGrid = React.useRef(null);
   const previewGrid = React.useRef(null);
+  const previewCamRef = React.useRef(null);
 
   const [cards, setCards] = React.useState([
     {
@@ -96,6 +98,8 @@ export default function Interface() {
       imageList: []
     }
   ]);
+
+  const [isTrained, setIsTrained] = React.useState(false);
 
   React.useEffect(() => {
     if (captureElList.current.length !== cards.length) {
@@ -297,6 +301,15 @@ export default function Interface() {
   function TrainColumn(props) {
     const width = useParentWidthSize(props);
     
+    const webcamEl = document.getElementById('webcam');
+
+    const handleTrain = () => {
+      setIsTrained(true);
+      props.captureEl.current.forEach(f => f.current());
+      console.log(previewCamRef.current)
+      train(cards, previewCamRef.current);
+    }
+
     return (
       <React.Fragment>
         <Card style={{ width: width }} className={classes.cardCenter} >
@@ -306,8 +319,7 @@ export default function Interface() {
               size="medium"
               fullWidth={true}
               onClick={() => {
-                props.captureEl.current.forEach(f => f.current());
-                train(cards);
+                handleTrain()
               }}
               disableElevation>
               Train Model
@@ -373,6 +385,36 @@ export default function Interface() {
     );
   }
 
+
+  function PreviewCam(props) {
+
+    // const handleUpload = (e, imgSrc) => {
+    //   props.onChange(e, imgSrc);
+    // }
+
+    // const preview = (e) => {
+    //   const imageSrc = previewCamRef.current.getScreenshot();
+    //   handleUpload(e, imageSrc);
+    // };
+
+    return (
+      <Grid container direction="column" justifyContent="space-between" alignItems="stretch" >
+        {isTrained ? <Webcam
+          audio={false}
+          ref={previewCamRef}
+          id="webcam"
+          screenshotFormat="image/jpeg"
+          forceScreenshotSourceSize="true"
+          width="224"
+          height="224"
+          style={{
+            width: "100%"
+          }}
+        /> : null}
+      </Grid>
+    );
+  };
+
   function PreviewColumn(props) {
     const width = useParentWidthSize(props);
     return (
@@ -384,6 +426,7 @@ export default function Interface() {
             </Button>
           } />
           <CardContent className={classes.cardContent}>
+            <PreviewCam />
             <Typography>
               You can preview the result here after training a model on the left.
             </Typography>
