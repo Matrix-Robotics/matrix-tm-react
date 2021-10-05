@@ -14,6 +14,9 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Edit from "@material-ui/icons/Edit";
 import PublishIcon from '@material-ui/icons/Publish';
@@ -26,10 +29,12 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
 import Capture from './Capture.js';
-import train from './train.js';
+
+import * as tf from '@tensorflow/tfjs';
+import * as mobilenet from '@tensorflow-models/mobilenet';
+import * as knnClassifier from '@tensorflow-models/knn-classifier';
 
 const ITEM_HEIGHT = 80;
-
 const useStyles = makeStyles((theme) => ({
   grid: {
     padding: theme.spacing(8)
@@ -77,6 +82,65 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+let net;
+const classifier = knnClassifier.create();
+
+async function train(cards) {
+  // Load the model.
+  console.log('Loading mobilenet..');
+  net = await mobilenet.load();
+  console.log('Successfully loaded model');
+
+  // Reads an image from the webcam and associates it with a specific class
+  // index.
+  const addExample = async (classTitle, imgSrc) => {
+    // Get the intermediate activation of MobileNet 'conv_preds' and pass that
+    // to the KNN classifier.
+    const activation = net.infer(imgSrc, true);
+
+    // Pass the intermediate activation to the classifier.
+    classifier.addExample(activation, classTitle);
+
+  };
+
+  cards.forEach(card => {
+    let tempImageList = card.imageList;
+    if(typeof tempImageList !== 'undefined' && tempImageList.length > 0) {
+      tempImageList.forEach(image => {
+        // blob to HTMLImageElement
+        let tempImageEl = new Image(200,200);
+        tempImageEl.src = image;
+        addExample(card.title, tempImageEl);
+      });
+    }
+  })
+
+  return true;
+}
+
+async function preview(webcam) {
+  if (classifier.getNumClasses() > 0) {
+    const webcamRes = await webcam;
+    const img = await webcamRes.capture();
+
+    // Get the activation from mobilenet from the webcam.
+    const activation = net.infer(img, 'conv_preds');
+    // Get the most likely class and confidence from the classifier module.
+    const result = await classifier.predictClass(activation);
+
+    document.getElementById('console').innerText = `
+      prediction: ${[result.label]}\n
+      probability: ${result.confidences[result.label]}
+    `;
+    
+    // Dispose the tensor to release the memory.
+    img.dispose();
+  }
+
+  await tf.nextFrame();
+}
+
+
 export default function Interface() {
 
   const classes = useStyles();
@@ -86,6 +150,7 @@ export default function Interface() {
   const previewGrid = React.useRef(null);
   const previewCamRef = React.useRef(null);
 
+  const [isTrained, setIsTrained] = React.useState(false);
   const [cards, setCards] = React.useState([
     {
       cardId: 1,
@@ -99,13 +164,26 @@ export default function Interface() {
     }
   ]);
 
-  const [isTrained, setIsTrained] = React.useState(false);
-
   React.useEffect(() => {
     if (captureElList.current.length !== cards.length) {
       captureElList.current = Array(cards.length).fill().map((_, i) => captureElList.current[i] || React.createRef());
     }
   },[captureElList, cards.length])
+
+  function useParentWidthSize(porps) {
+    const [width, setWidth] = React.useState();
+    React.useEffect(() => {
+      let temp = getComputedStyle(porps.parentNode.current)
+      function updateSize() {
+        setWidth(porps.parentNode.current.clientWidth - parseFloat(temp.paddingLeft) - parseFloat(temp.paddingRight));
+      }
+      window.addEventListener('resize', updateSize);
+      updateSize();
+      return () => window.removeEventListener('resize', updateSize);
+    });
+    return width;
+  }
+
 
   function ClassColumn() {
 
@@ -284,30 +362,12 @@ export default function Interface() {
     );
   };
 
-  function useParentWidthSize(porps) {
-    const [width, setWidth] = React.useState();
-    React.useEffect(() => {
-      let temp = getComputedStyle(porps.parentNode.current)
-      function updateSize() {
-        setWidth(porps.parentNode.current.clientWidth - parseFloat(temp.paddingLeft) - parseFloat(temp.paddingRight));
-      }
-      window.addEventListener('resize', updateSize);
-      updateSize();
-      return () => window.removeEventListener('resize', updateSize);
-    });
-    return width;
-  }
-
   function TrainColumn(props) {
     const width = useParentWidthSize(props);
-    
-    const webcamEl = document.getElementById('webcam');
 
     const handleTrain = () => {
-      setIsTrained(true);
       props.captureEl.current.forEach(f => f.current());
-      console.log(webcamEl)
-      train(cards, webcamEl);
+      setIsTrained(train(cards));
     }
 
     return (
@@ -388,29 +448,68 @@ export default function Interface() {
 
   function PreviewCam(props) {
 
-    // const handleUpload = (e, imgSrc) => {
-    //   props.onChange(e, imgSrc);
-    // }
+    const [state, setState] = React.useState({
+      inputSrc: false,
+    });
 
-    // const preview = (e) => {
-    //   const imageSrc = previewCamRef.current.getScreenshot();
-    //   handleUpload(e, imageSrc);
-    // };
+    const handleCheck = (event) => {
+      setState({ ...state, [event.target.name]: event.target.checked });
+    };
+    
+    async function loadWebEl() {
+      const webcamEl = document.getElementById('webcam');
+      const webcam = await tf.data.webcam(webcamEl);
+      return webcam
+    }
 
+    function startPreview(webcam) {
+      preview(webcam);
+      if(state.inputSrc) setTimeout(startPreview, 100, webcam);
+    };
+
+    React.useEffect(() => {
+      if (isTrained) {
+        const webcam = loadWebEl();
+        if(state.inputSrc){
+          startPreview(webcam);
+        }
+      }
+    });
+  
     return (
       <Grid container direction="column" justifyContent="space-between" alignItems="stretch" >
-        {isTrained ? <Webcam
-          audio={false}
-          ref={previewCamRef}
-          id="webcam"
-          screenshotFormat="image/jpeg"
-          forceScreenshotSourceSize="true"
-          width="224"
-          height="224"
-          style={{
-            width: "100%"
-          }}
-        /> : null}
+        {isTrained &&
+          <CardActions className={classes.cardButton}>
+            <Webcam
+              audio={false}
+              ref={previewCamRef}
+              id="webcam"
+              screenshotFormat="image/jpeg"
+              forceScreenshotSourceSize="true"
+              width="224"
+              height="224"
+              style={{
+                width: "100%"
+              }}
+            />
+            <FormGroup row>
+              <Typography>
+                {state.inputSrc ? "Input ON" : "Input OFF"}
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={state.inputSrc}
+                    onChange={handleCheck}
+                    name="inputSrc"
+                    color="primary"
+                  />
+                }
+                label={state.inputSrc}
+              />
+            </FormGroup>
+          </CardActions>}
+          <div id="console"></div>
       </Grid>
     );
   };
