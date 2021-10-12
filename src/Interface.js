@@ -128,6 +128,7 @@ async function preview(webcam) {
     // Get the most likely class and confidence from the classifier module.
     const result = await classifier.predictClass(activation);
 
+    // console.log(result);
     document.getElementById('console').innerText = `
       prediction: ${[result.label]}\n
       probability: ${result.confidences[result.label]}
@@ -264,6 +265,9 @@ export default function Interface() {
       tempCards[index].title = e.currentTarget.value;
       handleCards(tempCards);
       setIsTitleFocused(false);
+      
+      // update globale cards imageList state after title updated
+      captureElList.current[cards.map(card => card.cardId).indexOf(props.cardId)].current();
     }
 
     const handleImageList = (imageList) => {
