@@ -14,7 +14,7 @@ import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    maxWidth: "100%"
+    width: "100%"
   },
   imageList: {
     transform: 'translateZ(0)',
@@ -23,10 +23,24 @@ const useStyles = makeStyles((theme) => ({
 
 
 function WebcamCapture(props) {
+
   const webcamRef = React.useRef(null);
+  const [mouseHandler, setMouseHandler] = React.useState(1);
 
   const handleUpload = (e, imgSrc) => {
     props.onChange(e, imgSrc);
+  }
+
+  const handleMouseDown = (e) => {
+    setMouseHandler(setTimeout(capture, 10, e));
+    console.log(mouseHandler)
+    if(mouseHandler) {
+      setMouseHandler(setTimeout(handleMouseDown, 150, e));
+    }
+  }
+
+  const handleMouseUp = () => {
+    clearTimeout(mouseHandler);
   }
 
   const capture = (e) => {
@@ -42,13 +56,12 @@ function WebcamCapture(props) {
         id="webcam"
         screenshotFormat="image/jpeg"
         forceScreenshotSourceSize="true"
-        height={224}
         width={224}
         style={{
           width: "100%"
         }}
       />
-      <Button variant="contained" color="primary" size="medium" onClick={capture}>
+      <Button variant="contained" color="primary" size="medium" onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
         Capture Photo
       </Button>
     </Grid>

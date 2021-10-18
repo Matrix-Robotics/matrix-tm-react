@@ -267,7 +267,7 @@ export default function Interface() {
       setIsTitleFocused(false);
       
       // update globale cards imageList state after title updated
-      captureElList.current[cards.map(card => card.cardId).indexOf(props.cardId)].current();
+      captureElList.current.forEach(f => f.current());
     }
 
     const handleImageList = (imageList) => {
@@ -351,7 +351,8 @@ export default function Interface() {
                   onChange={e => setCardTitle(e.currentTarget.value)}
                   onKeyDown={e => {
                     if (e.key === 'Enter') {
-                      setCardTitle(cardTitleRef.current.value)
+                      cardTitleRef.current.blur();
+                      setCardTitle(cardTitleRef.current.value);
                     }
                   }}
                 />
