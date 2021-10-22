@@ -189,6 +189,9 @@ export default function Interface() {
   function ClassColumn() {
 
     const onAddClassBtnClick = () => {
+      // update global cards imageList state before add new class
+      captureElList.current.forEach(f => f.current());
+
       let tempCards = [...cards];
       if (tempCards.length) {
         let newCardId = tempCards.at(-1).cardId + 1;
@@ -266,7 +269,7 @@ export default function Interface() {
       handleCards(tempCards);
       setIsTitleFocused(false);
       
-      // update globale cards imageList state after title updated
+      // update global cards imageList state after title updated
       captureElList.current.forEach(f => f.current());
     }
 
@@ -281,6 +284,9 @@ export default function Interface() {
       let tempCards = [...cards];
       switch (opt) {
         case 'Delete Class':
+          // update global cards imageList state before delete class
+          captureElList.current.forEach(f => f.current());
+
           let index = tempCards.map(card => card.cardId).indexOf(props.cardId);
           tempCards.splice(index, 1);
           handleCards(tempCards);
