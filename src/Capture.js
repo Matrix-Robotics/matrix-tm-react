@@ -14,11 +14,17 @@ import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    width: "100%"
+    width: '100%'
   },
   imageList: {
-    transform: 'translateZ(0)',
+    maxHeight: '300px',
+    overflowY: 'auto',
+    transform: 'translateZ(0)'
   },
+  image: {
+    height: '100%',
+    maxWidth: '100%'
+  }
 }));
 
 
@@ -33,9 +39,8 @@ function WebcamCapture(props) {
 
   const handleMouseDown = (e) => {
     setMouseHandler(setTimeout(capture, 10, e));
-    console.log(mouseHandler)
     if(mouseHandler) {
-      setMouseHandler(setTimeout(handleMouseDown, 150, e));
+      setMouseHandler(setTimeout(handleMouseDown, 50, e));
     }
   }
 
@@ -73,6 +78,7 @@ export default function Capture(props) {
 
   const classes = useStyles();
 
+  const scrollRef = React.useRef();
   const [selectedFiles, setSelectedFiles] = React.useState([]);
 
   const handleUpload = (e, src) => {
@@ -107,6 +113,11 @@ export default function Capture(props) {
     }
   }, [props.imageList])
 
+  React.useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  })
 
   const [toggleWebcam, setToggleWebcam] = React.useState(false);
   const handleToggle = () => setToggleWebcam(!toggleWebcam);
@@ -119,10 +130,10 @@ export default function Capture(props) {
           <Typography>
             Add Image Samples:
           </Typography>
-          <ImageList className={classes.imageList} rowHeight={80} cols={4}>
+          <ImageList className={classes.imageList} ref={scrollRef} rowHeight="auto" cols={4}>
             {selectedFiles.map((item) => (
               <ImageListItem key={item} cols={item.cols || 1}>
-                <img src={item} alt={item.title} />
+                <img className={classes.image} src={item} alt={item.title} />
               </ImageListItem>)
             )}
           </ImageList>
