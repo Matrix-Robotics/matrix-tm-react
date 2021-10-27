@@ -190,7 +190,7 @@ export default function Interface() {
 
     const onAddClassBtnClick = () => {
       // update global cards imageList state before add new class
-      captureElList.current.forEach(f => f.current());
+      captureElList.current.forEach(f => f.current[0]());
 
       let tempCards = [...cards];
       if (tempCards.length) {
@@ -270,7 +270,7 @@ export default function Interface() {
       setIsTitleFocused(false);
       
       // update global cards imageList state after title updated
-      captureElList.current.forEach(f => f.current());
+      captureElList.current.forEach(f => f.current[0]());
     }
 
     const handleImageList = (imageList) => {
@@ -280,12 +280,16 @@ export default function Interface() {
       handleCards(tempCards);
     };
 
+    const handleCamera = () => {
+      captureElList.current.forEach(f => f.current[1]());
+    }
+
     const handleOpe = (opt) => {
       let tempCards = [...cards];
       switch (opt) {
         case 'Delete Class':
           // update global cards imageList state before delete class
-          captureElList.current.forEach(f => f.current());
+          captureElList.current.forEach(f => f.current[0]());
 
           let index = tempCards.map(card => card.cardId).indexOf(props.cardId);
           tempCards.splice(index, 1);
@@ -365,7 +369,7 @@ export default function Interface() {
               )}
             />
             <CardActions className={classes.cardButton}>
-              <Capture key={props.cardId} cardId={props.cardId} imageList={props.imageList} captureEl={captureElList.current[cards.map(card => card.cardId).indexOf(props.cardId)]} onChange={handleImageList} />
+              <Capture key={props.cardId} cardId={props.cardId} imageList={props.imageList} captureEl={captureElList.current[cards.map(card => card.cardId).indexOf(props.cardId)]} onChange={handleImageList} onCameraOn={handleCamera}/>
             </CardActions>
           </Card>
         </Grid>
@@ -377,7 +381,7 @@ export default function Interface() {
     const width = useParentWidthSize(props);
 
     const handleTrain = () => {
-      props.captureEl.current.forEach(f => f.current());
+      props.captureEl.current.forEach(f => f.current.forEach(f => f()));
       setIsTrained(train(cards));
     }
 

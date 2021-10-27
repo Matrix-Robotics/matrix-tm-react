@@ -1,5 +1,6 @@
 import React from "react";
 import Webcam from "react-webcam";
+import Alert from '@material-ui/lab/Alert';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
@@ -80,6 +81,29 @@ export default function Capture(props) {
 
   const scrollRef = React.useRef();
   const [selectedFiles, setSelectedFiles] = React.useState([]);
+  const [toggleWebcam, setToggleWebcam] = React.useState(false);
+  const [alertPerm, setAlertPerm] = React.useState(false);
+
+  const handleToggle = () => {
+
+    props.onCameraOn();
+
+    async function checkIsApproved() {
+      let deviceInfo = await navigator.mediaDevices.enumerateDevices()
+      
+      // are there any permitted webcam devices on the list
+      return [...deviceInfo].some(info => info.label !== "");
+    }
+
+    checkIsApproved().then(res => {
+      if(res) {
+        setAlertPerm(false);
+        setToggleWebcam(prevState => !prevState);
+      } else {
+        setAlertPerm(true);
+      }
+    });
+  };
 
   const handleUpload = (e, src) => {
     if (e.target.files) {
@@ -101,11 +125,15 @@ export default function Capture(props) {
     setSelectedFiles(props.imageList);
   }, [props, selectedFiles]);
 
+  const handleCamera = React.useCallback(() => {
+    setToggleWebcam(false);
+  }, []);
+
   React.useEffect(() => {
     if (props.captureEl) {
-      props.captureEl.current = handleImageList;
+      props.captureEl.current = [handleImageList, handleCamera];
     }
-  }, [props.captureEl, handleImageList])
+  }, [props.captureEl, handleImageList, handleCamera])
 
   React.useEffect(() => {
     if(props.imageList) {
@@ -119,8 +147,6 @@ export default function Capture(props) {
     }
   })
 
-  const [toggleWebcam, setToggleWebcam] = React.useState(false);
-  const handleToggle = () => setToggleWebcam(!toggleWebcam);
 
   return (
     <Box className={classes.root} key={props.cardId}>
@@ -159,6 +185,13 @@ export default function Capture(props) {
           </label>
         </Box>
       </Box>
+      {alertPerm ? 
+        <div>
+          <Alert onClose={() => {setAlertPerm(false)}} severity="error">
+            You must grant this site to access your camera.
+          </Alert>
+        </div> : null
+      }
     </Box>
   );
 };
