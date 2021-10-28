@@ -9,7 +9,7 @@ import ImageList from '@material-ui/core/ImageList';
 import ImageListItem from '@material-ui/core/ImageListItem';
 import MicIcon from '@material-ui/icons/Mic';
 import { makeStyles } from '@material-ui/core/styles';
-// import Permissions from './Record.js';
+import AudioRecord from './Record';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -121,10 +121,16 @@ export default function Capture(props) {
   const [toggleWebcam, setToggleWebcam] = React.useState(false);
   const handleToggle = () => setToggleWebcam(!toggleWebcam);
 
+
+  const [toggleRecord, settoggleRecord] = React.useState(false);
+  const handleRecToggle = () => settoggleRecord(!toggleRecord);
+
   return (
     <Box className={classes.root} key={props.cardId}>
       <Grid container spacing={2} direction="row" justifyContent="space-between" alignItems="flex-start" >
-        {toggleWebcam ? <Grid item xs={6}><WebcamCapture onChange={handleUpload} /></Grid> : null}
+        {/* {toggleWebcam ? <Grid item xs={6}><WebcamCapture onChange={handleUpload} /></Grid> : null} */}
+        {/* {toggleRecord ? <Grid item xs={6}><AudioRecord onChange={toggleRecord} /></Grid> : null} */}
+
         <Grid item xs={6} overflow="visible" >
           <Typography>
             Add Audio Samples:
@@ -138,9 +144,12 @@ export default function Capture(props) {
           </ImageList>
         </Grid>
       </Grid>
+      <Button ><AudioRecord state={handleRecToggle}></AudioRecord>
+      </Button>
+
       <Box display="flex" pt={2}>
         <Box p={0.5}>
-          <Button variant="outlined" size="large" color="primary" onClick={handleToggle} startIcon={<MicIcon />}>
+          <Button variant="outlined" size="large" color="primary" onClick={handleRecToggle} startIcon={<MicIcon />}>
             Mic
           </Button>
         </Box>
