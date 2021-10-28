@@ -105,10 +105,10 @@ async function train(cards) {
 
   cards.forEach(card => {
     let tempImageList = card.imageList;
-    if(typeof tempImageList !== 'undefined' && tempImageList.length > 0) {
+    if (typeof tempImageList !== 'undefined' && tempImageList.length > 0) {
       tempImageList.forEach(image => {
         // blob to HTMLImageElement
-        let tempImageEl = new Image(200,200);
+        let tempImageEl = new Image(200, 200);
         tempImageEl.src = image;
         addExample(card.title, tempImageEl);
       });
@@ -133,7 +133,7 @@ async function preview(webcam) {
       prediction: ${[result.label]}\n
       probability: ${result.confidences[result.label]}
     `;
-    
+
     // Dispose the tensor to release the memory.
     img.dispose();
   }
@@ -145,7 +145,7 @@ async function preview(webcam) {
 export default function Interface() {
 
   const classes = useStyles();
-  
+
   const captureElList = React.useRef([]);
   const trainGrid = React.useRef(null);
   const previewGrid = React.useRef(null);
@@ -155,7 +155,7 @@ export default function Interface() {
   const [cards, setCards] = React.useState([
     {
       cardId: 1,
-      title: 'Class ' + 1,
+      title: 'Background Noise',
       imageList: []
     },
     {
@@ -169,7 +169,7 @@ export default function Interface() {
     if (captureElList.current.length !== cards.length) {
       captureElList.current = Array(cards.length).fill().map((_, i) => captureElList.current[i] || React.createRef());
     }
-  },[captureElList, cards.length])
+  }, [captureElList, cards.length])
 
   function useParentWidthSize(porps) {
     const [width, setWidth] = React.useState();
@@ -236,14 +236,14 @@ export default function Interface() {
       'Disable Class',
       'Remove All Samples'
     ];
-    
+
     const [cardTitle, setCardTitle] = React.useState();
     const [isTitleFocused, setIsTitleFocused] = React.useState(false);
 
     const cardTitleRef = React.useRef();
 
     React.useEffect(() => {
-      if(props.title) {
+      if (props.title) {
         setCardTitle(props.title);
       }
     }, [props.title]);
@@ -268,7 +268,7 @@ export default function Interface() {
       tempCards[index].title = e.currentTarget.value;
       handleCards(tempCards);
       setIsTitleFocused(false);
-      
+
       // update global cards imageList state after title updated
       captureElList.current.forEach(f => f.current());
     }
@@ -466,7 +466,7 @@ export default function Interface() {
     const handleCheck = (event) => {
       setState({ ...state, [event.target.name]: event.target.checked });
     };
-    
+
     async function loadWebEl() {
       const webcamEl = document.getElementById('webcam');
       const webcam = await tf.data.webcam(webcamEl);
@@ -475,18 +475,18 @@ export default function Interface() {
 
     function startPreview(webcam) {
       preview(webcam);
-      if(state.inputSrc) setTimeout(startPreview, 100, webcam);
+      if (state.inputSrc) setTimeout(startPreview, 100, webcam);
     };
 
     React.useEffect(() => {
       if (isTrained) {
         const webcam = loadWebEl();
-        if(state.inputSrc){
+        if (state.inputSrc) {
           startPreview(webcam);
         }
       }
     });
-  
+
     return (
       <Grid container direction="column" justifyContent="space-between" alignItems="stretch" >
         {isTrained &&
@@ -520,7 +520,7 @@ export default function Interface() {
               />
             </FormGroup>
           </CardActions>}
-          <div id="console"></div>
+        <div id="console"></div>
       </Grid>
     );
   };

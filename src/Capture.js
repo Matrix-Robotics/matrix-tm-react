@@ -7,10 +7,9 @@ import Typography from '@material-ui/core/Typography';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import ImageList from '@material-ui/core/ImageList';
 import ImageListItem from '@material-ui/core/ImageListItem';
-import GestureIcon from '@material-ui/icons/Gesture';
-import VideocamOutlinedIcon from '@material-ui/icons/VideocamOutlined';
+import MicIcon from '@material-ui/icons/Mic';
 import { makeStyles } from '@material-ui/core/styles';
-
+// import Permissions from './Record.js';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -39,7 +38,7 @@ function WebcamCapture(props) {
 
   const handleMouseDown = (e) => {
     setMouseHandler(setTimeout(capture, 10, e));
-    if(mouseHandler) {
+    if (mouseHandler) {
       setMouseHandler(setTimeout(handleMouseDown, 50, e));
     }
   }
@@ -108,7 +107,7 @@ export default function Capture(props) {
   }, [props.captureEl, handleImageList])
 
   React.useEffect(() => {
-    if(props.imageList) {
+    if (props.imageList) {
       setSelectedFiles(props.imageList);
     }
   }, [props.imageList])
@@ -128,7 +127,7 @@ export default function Capture(props) {
         {toggleWebcam ? <Grid item xs={6}><WebcamCapture onChange={handleUpload} /></Grid> : null}
         <Grid item xs={6} overflow="visible" >
           <Typography>
-            Add Image Samples:
+            Add Audio Samples:
           </Typography>
           <ImageList className={classes.imageList} ref={scrollRef} rowHeight="auto" cols={4}>
             {selectedFiles.map((item) => (
@@ -141,13 +140,8 @@ export default function Capture(props) {
       </Grid>
       <Box display="flex" pt={2}>
         <Box p={0.5}>
-          <Button variant="outlined" size="large" color="primary" onClick={handleToggle} startIcon={<VideocamOutlinedIcon />}>
-            Webcam
-          </Button>
-        </Box>
-        <Box p={0.5}>
-          <Button variant="outlined" size="large" color="primary" startIcon={<GestureIcon />}>
-            Draw
+          <Button variant="outlined" size="large" color="primary" onClick={handleToggle} startIcon={<MicIcon />}>
+            Mic
           </Button>
         </Box>
         <Box p={0.5}>
