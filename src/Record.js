@@ -29,11 +29,8 @@ class AudioRecord extends Component {
             blobURL: recordedBlob.blobURL,
             recordedBlob: recordedBlob
         });
+        console.log(this.state.recordedBlob);
     };
-
-    downloadRecording() {
-        let newBlob = new Blob(this.state.recordedBlob, { type: "audio/mpeg-3" });
-    }
 
     onData() {
         console.log("recording");
@@ -42,24 +39,22 @@ class AudioRecord extends Component {
         console.log(this.state)
         return (
             <div className="AudioRecord">
-                <h1>Hello CodeSandbox</h1>
                 <ReactMic
                     record={this.state.record}
-                    className="sound-wave"
+                    visualSetting="sinewave"
+                    className="Sound-wave"
                     onStop={this.onStop}
                     onData={this.onData}
                     strokeColor="#111"
-                    backgroundColor="#fcfcfc"
+                    backgroundColor="#fff"
                 />
                 <button
-                    style={{ marginTop: 25, marginBottom: 25 }}
                     color="blue"
                     onClick={this.startRecording}
                 >
-                    Record a sound
+                    Record
                 </button>
                 <button onClick={this.stopRecording}>Stop</button>
-                <button onClick={this.downloadRecording}>Download</button>
                 <p>{this.state.blobURL}</p>
             </div>
         );

@@ -25,3 +25,7 @@ code {
 .MuiInput-underline::before {
   border-bottom-width: 0!important;
 }
+
+.Sound-wave{
+  width: 50%;
+}
