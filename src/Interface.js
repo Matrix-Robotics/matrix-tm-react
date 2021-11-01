@@ -465,12 +465,12 @@ export default function Interface() {
       <React.Fragment>
         {Object.entries(props.predictClasses).map((predictClass) =>
           <Box display="flex" alignItems="center">
-              <Box minWidth="20%">
+              <Box minWidth="15%">
                 <Typography variant="body2" color="textSecondary">
                   {predictClass[0]}
                 </Typography>
               </Box>
-              <Box width="70%" mr={1}>
+              <Box minWidth="75%" mr={1}>
                 <LinearProgress variant="determinate" value={predictClass[1] * 100} />
               </Box>
               <Box minWidth="10%">
@@ -489,6 +489,7 @@ export default function Interface() {
 
   function PreviewCam(props) {
 
+    const [previewHandler, setPreviewHandler] = React.useState(1);
     const [state, setState] = React.useState({
       inputSrc: false,
       predictClasses: {}
@@ -496,6 +497,7 @@ export default function Interface() {
 
     const handleCheck = (event) => {
       setState({ ...state, [event.target.name]: event.target.checked });
+      clearTimeout(previewHandler);
     };
     
     async function loadWebEl() {
@@ -509,13 +511,12 @@ export default function Interface() {
 
       result.then(res => {
         if (res.label !== "") {
-          // let label = res.label;
           let confidences = res.confidences;
           setState(state => ({ ...state, predictClasses: confidences}));
         }
       });
 
-      if(state.inputSrc) setTimeout(startPreview, 100, webcam);
+      if(state.inputSrc) setPreviewHandler(setTimeout(startPreview, 100, webcam))
     }, [state.inputSrc]);
 
     React.useEffect(() => {
@@ -526,7 +527,6 @@ export default function Interface() {
         }
       }
       return () => {
-        
       };
     },[startPreview, state.inputSrc]);
   
