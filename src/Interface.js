@@ -4,6 +4,7 @@ import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
 import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
@@ -17,6 +18,7 @@ import Typography from '@material-ui/core/Typography';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Edit from "@material-ui/icons/Edit";
 import PublishIcon from '@material-ui/icons/Publish';
@@ -127,15 +129,11 @@ async function preview(webcam) {
     const activation = net.infer(img, 'conv_preds');
     // Get the most likely class and confidence from the classifier module.
     const result = await classifier.predictClass(activation);
-
-    // console.log(result);
-    document.getElementById('console').innerText = `
-      prediction: ${[result.label]}\n
-      probability: ${result.confidences[result.label]}
-    `;
     
     // Dispose the tensor to release the memory.
     img.dispose();
+
+    return result;
   }
 
   await tf.nextFrame();
@@ -461,10 +459,39 @@ export default function Interface() {
   }
 
 
+  function PreviewClassConfidence(props) {
+
+    return (
+      <React.Fragment>
+        {Object.entries(props.predictClasses).map((predictClass) =>
+          <Box display="flex" alignItems="center">
+              <Box minWidth="20%">
+                <Typography variant="body2" color="textSecondary">
+                  {predictClass[0]}
+                </Typography>
+              </Box>
+              <Box width="70%" mr={1}>
+                <LinearProgress variant="determinate" value={predictClass[1] * 100} />
+              </Box>
+              <Box minWidth="10%">
+                <Typography variant="body2" color="textSecondary">
+                  {`${Math.round(
+                    predictClass[1] * 100
+                    )}%`
+                  }
+                </Typography>
+              </Box>
+          </Box>
+        )}
+      </React.Fragment>
+    )
+  }
+
   function PreviewCam(props) {
 
     const [state, setState] = React.useState({
       inputSrc: false,
+      predictClasses: {}
     });
 
     const handleCheck = (event) => {
@@ -477,10 +504,19 @@ export default function Interface() {
       return webcam
     }
 
-    function startPreview(webcam) {
-      preview(webcam);
+    const startPreview = React.useCallback((webcam) => {
+      let result = preview(webcam);
+
+      result.then(res => {
+        if (res.label !== "") {
+          // let label = res.label;
+          let confidences = res.confidences;
+          setState(state => ({ ...state, predictClasses: confidences}));
+        }
+      });
+
       if(state.inputSrc) setTimeout(startPreview, 100, webcam);
-    };
+    }, [state.inputSrc]);
 
     React.useEffect(() => {
       if (isTrained) {
@@ -489,7 +525,10 @@ export default function Interface() {
           startPreview(webcam);
         }
       }
-    });
+      return () => {
+        
+      };
+    },[startPreview, state.inputSrc]);
   
     return (
       <Grid container direction="column" justifyContent="space-between" alignItems="stretch" >
@@ -508,23 +547,34 @@ export default function Interface() {
               }}
             />
             <FormGroup row>
-              <Typography>
-                {state.inputSrc ? "Input ON" : "Input OFF"}
-              </Typography>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={state.inputSrc}
-                    onChange={handleCheck}
-                    name="inputSrc"
-                    color="primary"
-                  />
-                }
-                label={state.inputSrc}
-              />
+              <Box minWidth="70%">
+                <Typography>
+                  {state.inputSrc ? "Input ON" : "Input OFF"}
+                </Typography>
+              </Box>
+              <Box minWidth="30%">
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={state.inputSrc}
+                      onChange={handleCheck}
+                      name="inputSrc"
+                      color="primary"
+                    />
+                  }
+                  label={state.inputSrc}
+                />
+              </Box>
             </FormGroup>
-          </CardActions>}
-          <div id="console"></div>
+          </CardActions>
+        }
+        {isTrained ? 
+          <PreviewClassConfidence predictClasses={state.predictClasses}/>
+          :
+          <Typography>
+            You can preview the result here after training a model on the left.
+          </Typography>
+        }
       </Grid>
     );
   };
@@ -541,9 +591,6 @@ export default function Interface() {
           } />
           <CardContent className={classes.cardContent}>
             <PreviewCam />
-            <Typography>
-              You can preview the result here after training a model on the left.
-            </Typography>
           </CardContent>
         </Card>
       </React.Fragment>

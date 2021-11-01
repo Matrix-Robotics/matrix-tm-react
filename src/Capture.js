@@ -188,7 +188,7 @@ export default function Capture(props) {
       {alertPerm ? 
         <div>
           <Alert onClose={() => {setAlertPerm(false)}} severity="error">
-            You must grant this site to access your camera.
+            You must grant this site to access your camera. Please check your privacy setting and try again.
           </Alert>
         </div> : null
       }
