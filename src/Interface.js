@@ -463,8 +463,8 @@ export default function Interface() {
 
     return (
       <React.Fragment>
-        {Object.entries(props.predictClasses).map((predictClass) =>
-          <Box display="flex" alignItems="center">
+        {Object.entries(props.predictClasses).map((predictClass, index) =>
+          <Box key={index} display="flex" alignItems="center">
               <Box minWidth="15%">
                 <Typography variant="body2" color="textSecondary">
                   {predictClass[0]}
