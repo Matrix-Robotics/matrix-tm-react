@@ -38,9 +38,6 @@ import * as knnClassifier from '@tensorflow-models/knn-classifier';
 
 const ITEM_HEIGHT = 80;
 const useStyles = makeStyles((theme) => ({
-  grid: {
-    padding: theme.spacing(8)
-  },
   classGrid: {
     minHeight: '100vh'
   },
@@ -82,6 +79,18 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.paper,
     padding: theme.spacing(6),
   },
+  grid: {
+    padding: theme.spacing(8)
+  },
+  progressColorPrimary: {
+    backgroundColor: '#DEDEDE'
+  },
+  progressBarActive: {
+    backgroundColor: '#00A1E9'
+  },
+  progressBarDisable: {
+    backgroundColor: '#6D6D6D'
+  }
 }));
 
 let net;
@@ -149,6 +158,7 @@ export default function Interface() {
   const previewGrid = React.useRef(null);
   const previewCamRef = React.useRef(null);
 
+  const [isTraining, setIsTraining] = React.useState(false);
   const [isTrained, setIsTrained] = React.useState(false);
   const [cards, setCards] = React.useState([
     {
@@ -379,24 +389,45 @@ export default function Interface() {
     const width = useParentWidthSize(props);
 
     const handleTrain = () => {
+      
       props.captureEl.current.forEach(f => f.current.forEach(f => f()));
-      setIsTrained(train(cards));
-    }
+
+      setIsTraining((prev) => !prev);
+
+      train(cards).then(res => {
+        setIsTrained(res);
+      });
+      
+    };
 
     return (
       <React.Fragment>
         <Card style={{ width: width }} className={classes.cardCenter} >
-          <CardHeader title="Training" />
+          <CardHeader title="Train" />
           <CardActions className={classes.cardButton}>
-            <Button variant="contained"
-              size="medium"
-              fullWidth={true}
-              onClick={() => {
-                handleTrain()
-              }}
-              disableElevation>
-              Train Model
-            </Button>
+            {isTrained ? 
+              <Button variant="contained"
+                size="medium"
+                fullWidth={true}
+                onClick={() => {
+                  handleTrain()
+                }}
+                disableElevation
+                disabled={isTrained}>
+                Trained
+              </Button>
+              :
+              <Button variant="contained"
+                size="medium"
+                fullWidth={true}
+                onClick={() => {
+                  handleTrain()
+                }}
+                disableElevation
+                disabled={isTraining}>
+                {isTraining ? `Training` : `Train Model`}
+              </Button>
+            }
           </CardActions>
           <Accordion>
             <AccordionSummary
@@ -471,7 +502,7 @@ export default function Interface() {
                 </Typography>
               </Box>
               <Box minWidth="75%" mr={1}>
-                <LinearProgress variant="determinate" value={predictClass[1] * 100} />
+                <LinearProgress classes={props.color} variant="determinate" value={predictClass[1] * 100} />
               </Box>
               <Box minWidth="10%">
                 <Typography variant="body2" color="textSecondary">
@@ -489,6 +520,7 @@ export default function Interface() {
 
   function PreviewCam(props) {
 
+    // const [barColor, setBarColor] = React.useState(barActiveColor);
     const [previewHandler, setPreviewHandler] = React.useState(1);
     const [state, setState] = React.useState({
       inputSrc: false,
@@ -532,7 +564,7 @@ export default function Interface() {
   
     return (
       <Grid container direction="column" justifyContent="space-between" alignItems="stretch" >
-        {isTrained &&
+        {isTrained ?
           <CardActions className={classes.cardButton}>
             <Webcam
               audio={false}
@@ -547,12 +579,12 @@ export default function Interface() {
               }}
             />
             <FormGroup row>
-              <Box minWidth="70%">
+              <Box>
                 <Typography>
                   {state.inputSrc ? "Input ON" : "Input OFF"}
                 </Typography>
               </Box>
-              <Box minWidth="30%">
+              <Box>
                 <FormControlLabel
                   control={
                     <Switch
@@ -567,13 +599,15 @@ export default function Interface() {
               </Box>
             </FormGroup>
           </CardActions>
-        }
-        {isTrained ? 
-          <PreviewClassConfidence predictClasses={state.predictClasses}/>
           :
           <Typography>
             You can preview the result here after training a model on the left.
           </Typography>
+        }
+        {state.inputSrc ? 
+          <PreviewClassConfidence predictClasses={state.predictClasses} color={{bar: classes.progressBarActive, colorPrimary: classes.progressColorPrimary}}/>
+          :
+          <PreviewClassConfidence predictClasses={state.predictClasses} color={{bar: classes.progressBarDisable, colorPrimary: classes.progressColorPrimary}}/>
         }
       </Grid>
     );
@@ -581,6 +615,7 @@ export default function Interface() {
 
   function PreviewColumn(props) {
     const width = useParentWidthSize(props);
+
     return (
       <React.Fragment>
         <Card style={{ width: width }} className={classes.cardCenter}>
