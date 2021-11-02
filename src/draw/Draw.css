@@ -1,0 +1,10 @@
+.tools {
+	display: flex;
+	justify-content: space-between;
+	width: 400px;
+}
+canvas {
+	/* display: flex; */
+  border: 1px solid black;
+	
+}

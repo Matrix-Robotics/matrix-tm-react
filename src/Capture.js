@@ -11,7 +11,7 @@ import ImageListItem from '@material-ui/core/ImageListItem';
 import GestureIcon from '@material-ui/icons/Gesture';
 import VideocamOutlinedIcon from '@material-ui/icons/VideocamOutlined';
 import { makeStyles } from '@material-ui/core/styles';
-
+import Drawing from "./draw/Draw";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -40,7 +40,7 @@ function WebcamCapture(props) {
 
   const handleMouseDown = (e) => {
     setMouseHandler(setTimeout(capture, 10, e));
-    if(mouseHandler) {
+    if (mouseHandler) {
       setMouseHandler(setTimeout(handleMouseDown, 50, e));
     }
   }
@@ -74,7 +74,6 @@ function WebcamCapture(props) {
   );
 };
 
-
 export default function Capture(props) {
 
   const classes = useStyles();
@@ -83,6 +82,7 @@ export default function Capture(props) {
   const [selectedFiles, setSelectedFiles] = React.useState([]);
   const [toggleWebcam, setToggleWebcam] = React.useState(false);
   const [alertPerm, setAlertPerm] = React.useState(false);
+  const [showDraw, setshowDraw] = React.useState(false)
 
   const handleToggle = () => {
 
@@ -90,13 +90,13 @@ export default function Capture(props) {
 
     async function checkIsApproved() {
       let deviceInfo = await navigator.mediaDevices.enumerateDevices()
-      
+
       // are there any permitted webcam devices on the list
       return [...deviceInfo].some(info => info.label !== "");
     }
 
     checkIsApproved().then(res => {
-      if(res) {
+      if (res) {
         setAlertPerm(false);
         setToggleWebcam(prevState => !prevState);
       } else {
@@ -129,6 +129,10 @@ export default function Capture(props) {
     setToggleWebcam(false);
   }, []);
 
+  const handleDraw = React.useCallback(() => {
+    setshowDraw(prevState => !prevState);
+  }, []);
+
   React.useEffect(() => {
     if (props.captureEl) {
       props.captureEl.current = [handleImageList, handleCamera];
@@ -136,7 +140,7 @@ export default function Capture(props) {
   }, [props.captureEl, handleImageList, handleCamera])
 
   React.useEffect(() => {
-    if(props.imageList) {
+    if (props.imageList) {
       setSelectedFiles(props.imageList);
     }
   }, [props.imageList])
@@ -147,11 +151,11 @@ export default function Capture(props) {
     }
   })
 
-
   return (
     <Box className={classes.root} key={props.cardId}>
       <Grid container spacing={2} direction="row" justifyContent="space-between" alignItems="flex-start" >
         {toggleWebcam ? <Grid item xs={6}><WebcamCapture onChange={handleUpload} /></Grid> : null}
+        {showDraw ? <Drawing /> : null}
         <Grid item xs={6} overflow="visible" >
           <Typography>
             Add Image Samples:
@@ -172,7 +176,7 @@ export default function Capture(props) {
           </Button>
         </Box>
         <Box p={0.5}>
-          <Button variant="outlined" size="large" color="primary" startIcon={<GestureIcon />}>
+          <Button variant="outlined" size="large" color="primary" onClick={handleDraw} startIcon={<GestureIcon />}>
             Draw
           </Button>
         </Box>
@@ -185,9 +189,9 @@ export default function Capture(props) {
           </label>
         </Box>
       </Box>
-      {alertPerm ? 
+      {alertPerm ?
         <div>
-          <Alert onClose={() => {setAlertPerm(false)}} severity="error">
+          <Alert onClose={() => { setAlertPerm(false) }} severity="error">
             You must grant this site to access your camera. Please check your privacy setting and try again.
           </Alert>
         </div> : null
