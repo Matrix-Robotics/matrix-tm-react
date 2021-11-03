@@ -288,7 +288,7 @@ export default function Interface() {
       handleCards(tempCards);
     };
 
-    const handleCamera = () => {
+    const closeCamera = () => {
       captureElList.current.forEach(f => f.current[1]());
     }
 
@@ -377,7 +377,7 @@ export default function Interface() {
               )}
             />
             <CardActions className={classes.cardButton}>
-              <Capture key={props.cardId} cardId={props.cardId} imageList={props.imageList} captureEl={captureElList.current[cards.map(card => card.cardId).indexOf(props.cardId)]} onChange={handleImageList} onCameraOn={handleCamera}/>
+              <Capture key={props.cardId} cardId={props.cardId} imageList={props.imageList} captureEl={captureElList.current[cards.map(card => card.cardId).indexOf(props.cardId)]} onChange={handleImageList} onCameraOn={closeCamera}/>
             </CardActions>
           </Card>
         </Grid>

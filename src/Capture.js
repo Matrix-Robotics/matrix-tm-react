@@ -81,11 +81,10 @@ export default function Capture(props) {
   const scrollRef = React.useRef();
   const [selectedFiles, setSelectedFiles] = React.useState([]);
   const [toggleWebcam, setToggleWebcam] = React.useState(false);
+  const [toggleDraw, setToggleDraw] = React.useState(false);
   const [alertPerm, setAlertPerm] = React.useState(false);
-  const [showDraw, setshowDraw] = React.useState(false)
 
-  const handleToggle = () => {
-
+  const handleWebcam = () => {
     props.onCameraOn();
 
     async function checkIsApproved() {
@@ -103,6 +102,10 @@ export default function Capture(props) {
         setAlertPerm(true);
       }
     });
+  };
+
+  const handleDraw = () => {
+    setToggleDraw(prevState => !prevState);
   };
 
   const handleUpload = (e, src) => {
@@ -125,19 +128,15 @@ export default function Capture(props) {
     setSelectedFiles(props.imageList);
   }, [props, selectedFiles]);
 
-  const handleCamera = React.useCallback(() => {
+  const closeCamera = React.useCallback(() => {
     setToggleWebcam(false);
-  }, []);
-
-  const handleDraw = React.useCallback(() => {
-    setshowDraw(prevState => !prevState);
   }, []);
 
   React.useEffect(() => {
     if (props.captureEl) {
-      props.captureEl.current = [handleImageList, handleCamera];
+      props.captureEl.current = [handleImageList, closeCamera];
     }
-  }, [props.captureEl, handleImageList, handleCamera])
+  }, [props.captureEl, handleImageList, closeCamera])
 
   React.useEffect(() => {
     if (props.imageList) {
@@ -155,7 +154,7 @@ export default function Capture(props) {
     <Box className={classes.root} key={props.cardId}>
       <Grid container spacing={2} direction="row" justifyContent="space-between" alignItems="flex-start" >
         {toggleWebcam ? <Grid item xs={6}><WebcamCapture onChange={handleUpload} /></Grid> : null}
-        {showDraw ? <Drawing /> : null}
+        {toggleDraw ? <Drawing /> : null}
         <Grid item xs={6} overflow="visible" >
           <Typography>
             Add Image Samples:
@@ -171,7 +170,7 @@ export default function Capture(props) {
       </Grid>
       <Box display="flex" pt={2}>
         <Box p={0.5}>
-          <Button variant="outlined" size="large" color="primary" onClick={handleToggle} startIcon={<VideocamOutlinedIcon />}>
+          <Button variant="outlined" size="large" color="primary" onClick={handleWebcam} startIcon={<VideocamOutlinedIcon />}>
             Webcam
           </Button>
         </Box>
