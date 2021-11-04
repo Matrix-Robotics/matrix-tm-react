@@ -34,7 +34,7 @@ function WebcamCapture(props) {
   const webcamRef = React.useRef(null);
   const [mouseHandler, setMouseHandler] = React.useState(1);
 
-  const handleUpload = (e, imgSrc) => {
+  const handleCapture = (e, imgSrc) => {
     props.onChange(e, imgSrc);
   }
 
@@ -51,7 +51,7 @@ function WebcamCapture(props) {
 
   const capture = (e) => {
     const imageSrc = webcamRef.current.getScreenshot();
-    handleUpload(e, imageSrc);
+    handleCapture(e, imageSrc);
   };
 
   return (
@@ -104,12 +104,16 @@ export default function Capture(props) {
     });
   };
 
+  const handleCapture = (e, src) => {
+    setSelectedFiles((prevImages) => prevImages.concat(src));
+  };
+
   const handleDraw = () => {
     setToggleDraw(prevState => !prevState);
   };
 
-  const handleUpload = (e, src) => {
-    if (e.target.files) {
+  const handleUpload = (e) => {
+    if (e.target !== null) {
       const filesArray = Array.from(e.target.files).map(
         (file) => URL.createObjectURL(file)
       );
@@ -118,8 +122,6 @@ export default function Capture(props) {
       Array.from(e.target.files).map(
         (file) => URL.revokeObjectURL(file) // avoid memory leak
       );
-    } else if (src) {
-      setSelectedFiles((prevImages) => prevImages.concat(src));
     }
   };
 
@@ -153,7 +155,7 @@ export default function Capture(props) {
   return (
     <Box className={classes.root} key={props.cardId}>
       <Grid container spacing={2} direction="row" justifyContent="space-between" alignItems="flex-start" >
-        {toggleWebcam ? <Grid item xs={6}><WebcamCapture onChange={handleUpload} /></Grid> : null}
+        {toggleWebcam ? <Grid item xs={6}><WebcamCapture onChange={handleCapture} /></Grid> : null}
         {toggleDraw ? <Drawing /> : null}
         <Grid item xs={6} overflow="visible" >
           <Typography>
