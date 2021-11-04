@@ -97,6 +97,7 @@ export default function Capture(props) {
     checkIsApproved().then(res => {
       if (res) {
         setAlertPerm(false);
+        setToggleDraw(false);
         setToggleWebcam(prevState => !prevState);
       } else {
         setAlertPerm(true);
@@ -109,6 +110,7 @@ export default function Capture(props) {
   };
 
   const handleDraw = () => {
+    setToggleWebcam(false);
     setToggleDraw(prevState => !prevState);
   };
 
