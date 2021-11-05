@@ -116,10 +116,10 @@ async function train(cards) {
 
   cards.forEach(card => {
     let tempImageList = card.imageList;
-    if(typeof tempImageList !== 'undefined' && tempImageList.length > 0) {
+    if (typeof tempImageList !== 'undefined' && tempImageList.length > 0) {
       tempImageList.forEach(image => {
         // blob to HTMLImageElement
-        let tempImageEl = new Image(200,200);
+        let tempImageEl = new Image(200, 200);
         tempImageEl.src = image;
         addExample(card.title, tempImageEl);
       });
@@ -138,7 +138,7 @@ async function preview(webcam) {
     const activation = net.infer(img, 'conv_preds');
     // Get the most likely class and confidence from the classifier module.
     const result = await classifier.predictClass(activation);
-    
+
     // Dispose the tensor to release the memory.
     img.dispose();
 
@@ -152,7 +152,7 @@ async function preview(webcam) {
 export default function Interface() {
 
   const classes = useStyles();
-  
+
   const captureElList = React.useRef([]);
   const trainGrid = React.useRef(null);
   const previewGrid = React.useRef(null);
@@ -177,7 +177,7 @@ export default function Interface() {
     if (captureElList.current.length !== cards.length) {
       captureElList.current = Array(cards.length).fill().map((_, i) => captureElList.current[i] || React.createRef());
     }
-  },[captureElList, cards.length])
+  }, [captureElList, cards.length])
 
   function useParentWidthSize(porps) {
     const [width, setWidth] = React.useState();
@@ -244,14 +244,14 @@ export default function Interface() {
       'Disable Class',
       'Remove All Samples'
     ];
-    
+
     const [cardTitle, setCardTitle] = React.useState();
     const [isTitleFocused, setIsTitleFocused] = React.useState(false);
 
     const cardTitleRef = React.useRef();
 
     React.useEffect(() => {
-      if(props.title) {
+      if (props.title) {
         setCardTitle(props.title);
       }
     }, [props.title]);
@@ -276,7 +276,7 @@ export default function Interface() {
       tempCards[index].title = e.currentTarget.value;
       handleCards(tempCards);
       setIsTitleFocused(false);
-      
+
       // update global cards imageList state after title updated
       captureElList.current.forEach(f => f.current[0]());
     }
@@ -377,7 +377,7 @@ export default function Interface() {
               )}
             />
             <CardActions className={classes.cardButton}>
-              <Capture key={props.cardId} cardId={props.cardId} imageList={props.imageList} captureEl={captureElList.current[cards.map(card => card.cardId).indexOf(props.cardId)]} onChange={handleImageList} onCameraOn={closeCamera}/>
+              <Capture key={props.cardId} cardId={props.cardId} imageList={props.imageList} captureEl={captureElList.current[cards.map(card => card.cardId).indexOf(props.cardId)]} onChange={handleImageList} onCameraOn={closeCamera} />
             </CardActions>
           </Card>
         </Grid>
@@ -387,9 +387,19 @@ export default function Interface() {
 
   function TrainColumn(props) {
     const width = useParentWidthSize(props);
+    const [EpochsValue, setEpochsValue] = React.useState("10");
+    const [BatchValue, setBatchValue] = React.useState("4");
+    const [LRateValue, setLRateValue] = React.useState("0.001");
+
+    // Reset Input Field handler
+    const resetAllValues = () => {
+      setEpochsValue("10");
+      setBatchValue("4");
+      setLRateValue("0.001");
+    };
 
     const handleTrain = () => {
-      
+
       props.captureEl.current.forEach(f => f.current.forEach(f => f()));
 
       setIsTraining((prev) => !prev);
@@ -397,7 +407,7 @@ export default function Interface() {
       train(cards).then(res => {
         setIsTrained(res);
       });
-      
+
     };
 
     return (
@@ -405,7 +415,7 @@ export default function Interface() {
         <Card style={{ width: width }} className={classes.cardCenter} >
           <CardHeader title="Train" />
           <CardActions className={classes.cardButton}>
-            {isTrained ? 
+            {isTrained ?
               <Button variant="contained"
                 size="medium"
                 fullWidth={true}
@@ -444,11 +454,13 @@ export default function Interface() {
                     Epochs:
                   </Typography>
                   <TextField
-                    id="epochs-number"
-                    defaultValue="50"
+                    id="epochs"
+                    InputProps={{ inputProps: { min: 1, max: 200 } }}
+                    value={EpochsValue}
                     type="number"
                     variant="outlined"
                     size="small"
+                    onChange={(e) => setEpochsValue(e.target.value)}
                   />
                 </div>
                 <div>
@@ -456,26 +468,35 @@ export default function Interface() {
                     Batch Size:
                   </Typography>
                   <TextField
-                    id="batch-size-number"
-                    defaultValue="16"
+                    id="batch-size"
+                    InputProps={{ inputProps: { min: 4, max: 512 } }}
+                    value={BatchValue}
                     type="number"
                     variant="outlined"
                     size="small"
+                    onChange={(e) => setBatchValue(e.target.value)}
                   />
                 </div>
+                {/* TODO: Set learning Rate by step: 0.001 */}
                 <div>
                   <Typography>
                     Learning Rate:
                   </Typography>
                   <TextField
-                    id="learning-rate-number"
-                    defaultValue="0.001"
+                    id="learning_rate"
                     type="number"
+                    InputProps={{
+                      maxLength: 13,
+                      step: "1"
+                    }}
+                    value={LRateValue}
                     variant="outlined"
                     size="small"
+                    onChange={(e) => setLRateValue(parseFloat(e.target.value).toFixed(1))}
                   />
+
                 </div>
-                <Button size="small" color="primary" endIcon={<RotateLeftIcon />} disableElevation>
+                <Button onClick={resetAllValues} size="small" color="primary" endIcon={<RotateLeftIcon />} disableElevation>
                   Reset Default
                 </Button>
                 <Button size="small" color="primary" endIcon={<AssessmentOutlinedIcon />} disableElevation>
@@ -496,22 +517,22 @@ export default function Interface() {
       <React.Fragment>
         {Object.entries(props.predictClasses).map((predictClass, index) =>
           <Box key={index} display="flex" alignItems="center">
-              <Box minWidth="15%">
-                <Typography variant="body2" color="textSecondary">
-                  {predictClass[0]}
-                </Typography>
-              </Box>
-              <Box minWidth="75%" mr={1}>
-                <LinearProgress classes={props.color} variant="determinate" value={predictClass[1] * 100} />
-              </Box>
-              <Box minWidth="10%">
-                <Typography variant="body2" color="textSecondary">
-                  {`${Math.round(
-                    predictClass[1] * 100
-                    )}%`
-                  }
-                </Typography>
-              </Box>
+            <Box minWidth="15%">
+              <Typography variant="body2" color="textSecondary">
+                {predictClass[0]}
+              </Typography>
+            </Box>
+            <Box minWidth="75%" mr={1}>
+              <LinearProgress classes={props.color} variant="determinate" value={predictClass[1] * 100} />
+            </Box>
+            <Box minWidth="10%">
+              <Typography variant="body2" color="textSecondary">
+                {`${Math.round(
+                  predictClass[1] * 100
+                )}%`
+                }
+              </Typography>
+            </Box>
           </Box>
         )}
       </React.Fragment>
@@ -531,7 +552,7 @@ export default function Interface() {
       setState({ ...state, [event.target.name]: event.target.checked });
       clearTimeout(previewHandler);
     };
-    
+
     async function loadWebEl() {
       const webcamEl = document.getElementById('webcam');
       const webcam = await tf.data.webcam(webcamEl);
@@ -544,24 +565,24 @@ export default function Interface() {
       result.then(res => {
         if (res.label !== "") {
           let confidences = res.confidences;
-          setState(state => ({ ...state, predictClasses: confidences}));
+          setState(state => ({ ...state, predictClasses: confidences }));
         }
       });
 
-      if(state.inputSrc) setPreviewHandler(setTimeout(startPreview, 100, webcam))
+      if (state.inputSrc) setPreviewHandler(setTimeout(startPreview, 100, webcam))
     }, [state.inputSrc]);
 
     React.useEffect(() => {
       if (isTrained) {
         const webcam = loadWebEl();
-        if(state.inputSrc){
+        if (state.inputSrc) {
           startPreview(webcam);
         }
       }
       return () => {
       };
-    },[startPreview, state.inputSrc]);
-  
+    }, [startPreview, state.inputSrc]);
+
     return (
       <Grid container direction="column" justifyContent="space-between" alignItems="stretch" >
         {isTrained ?
@@ -604,10 +625,10 @@ export default function Interface() {
             You can preview the result here after training a model on the left.
           </Typography>
         }
-        {state.inputSrc ? 
-          <PreviewClassConfidence predictClasses={state.predictClasses} color={{bar: classes.progressBarActive, colorPrimary: classes.progressColorPrimary}}/>
+        {state.inputSrc ?
+          <PreviewClassConfidence predictClasses={state.predictClasses} color={{ bar: classes.progressBarActive, colorPrimary: classes.progressColorPrimary }} />
           :
-          <PreviewClassConfidence predictClasses={state.predictClasses} color={{bar: classes.progressBarDisable, colorPrimary: classes.progressColorPrimary}}/>
+          <PreviewClassConfidence predictClasses={state.predictClasses} color={{ bar: classes.progressBarDisable, colorPrimary: classes.progressColorPrimary }} />
         }
       </Grid>
     );
