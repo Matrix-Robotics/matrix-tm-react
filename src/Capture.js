@@ -50,8 +50,10 @@ function WebcamCapture(props) {
   }
 
   const capture = (e) => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    handleCapture(e, imageSrc);
+    if (webcamRef.current.getScreenshot()) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      handleCapture(e, imageSrc);
+    }
   };
 
   return (
