@@ -85,24 +85,29 @@ export default function Capture(props) {
   const [alertPerm, setAlertPerm] = React.useState(false);
 
   const handleWebcam = () => {
-    props.onCameraOn();
+    if(toggleWebcam) {
+      setToggleWebcam(prevState => !prevState);
+      
+    } else {
+      props.onCameraOn();
 
-    async function checkIsApproved() {
-      let deviceInfo = await navigator.mediaDevices.enumerateDevices()
+      async function checkIsApproved() {
+        let deviceInfo = await navigator.mediaDevices.enumerateDevices()
 
-      // are there any permitted webcam devices on the list
-      return [...deviceInfo].some(info => info.label !== "");
-    }
-
-    checkIsApproved().then(res => {
-      if (res) {
-        setAlertPerm(false);
-        setToggleDraw(false);
-        setToggleWebcam(prevState => !prevState);
-      } else {
-        setAlertPerm(true);
+        // are there any permitted webcam devices on the list
+        return [...deviceInfo].some(info => info.label !== "");
       }
-    });
+
+      checkIsApproved().then(res => {
+        if (res) {
+          setAlertPerm(false);
+          setToggleDraw(false);
+          setToggleWebcam(prevState => !prevState);
+        } else {
+          setAlertPerm(true);
+        }
+      });
+    }
   };
 
   const handleCapture = (e, src) => {
