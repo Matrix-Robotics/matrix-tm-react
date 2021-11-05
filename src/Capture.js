@@ -176,9 +176,9 @@ export default function Capture(props) {
             Add Image Samples:
           </Typography>
           <ImageList className={classes.imageList} ref={scrollRef} rowHeight="auto" cols={4}>
-            {selectedFiles.map((item) => (
-              <ImageListItem key={item} cols={item.cols || 1}>
-                <img className={classes.image} src={item} alt={item.title} />
+            {selectedFiles.map((item, index) => (
+              <ImageListItem key={index} cols={item.cols || 1}>
+                <img key={index} className={classes.image} src={item} alt={item.title} />
               </ImageListItem>)
             )}
           </ImageList>

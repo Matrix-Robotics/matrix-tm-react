@@ -1,9 +1,9 @@
 import React from "react";
 
-import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton';
-import DeleteIcon from '@material-ui/icons/Delete';
+import AddToPhotosOutlinedIcon from '@material-ui/icons/AddToPhotosOutlined';
+import RefreshIcon from '@material-ui/icons/Refresh';
 import UndoIcon from '@material-ui/icons/Undo';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -64,7 +64,7 @@ export default function Drawing(props) {
               canvasRef.current.clear();
             }}
           >
-            <DeleteIcon />
+            <RefreshIcon />
           </IconButton>
           <IconButton
             onClick={() => {
@@ -73,14 +73,14 @@ export default function Drawing(props) {
           >
             <UndoIcon />
           </IconButton>
-          <Button color="primary"
+          <IconButton color="primary"
             onMouseDown={() => {
               handleDraw(canvasRef.current.canvasContainer.children[1].toDataURL())
               canvasRef.current.clear();
             }}
           >
-            Save
-          </Button>
+            <AddToPhotosOutlinedIcon />
+          </IconButton>
         </div>
       </Grid>
     </Grid>
