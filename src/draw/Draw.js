@@ -1,66 +1,88 @@
-import React, { Component } from "react";
+import React from "react";
+
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
+import UndoIcon from '@material-ui/icons/Undo';
+import { makeStyles } from '@material-ui/core/styles';
 
 import CanvasDraw from "react-canvas-draw";
-import classNames from "./Draw.css";
 
-class Drawing extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      color: "#000000",
-      width: 200,
-      height: 200,
-      brushRadius: 5,
-      lazyRadius: 0
-    };
+const useStyles = makeStyles((theme) => ({
+  buttons: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    width: '100%'
+  }
+}));
+
+export default function Drawing(props) {
+
+  const classes = useStyles();
+
+  const canvasGrid = React.useRef(null);
+  const canvasRef = React.useRef();
+
+  function useParentWidthSize(node) {
+    const [width, setWidth] = React.useState();
+    React.useEffect(() => {
+      let temp = getComputedStyle(node.current)
+      function updateSize() {
+        setWidth(node.current.clientWidth - parseFloat(temp.paddingLeft) - parseFloat(temp.paddingRight));
+      }
+      window.addEventListener('resize', updateSize);
+      updateSize();
+      return () => window.removeEventListener('resize', updateSize);
+    });
+    return width;
   }
 
-  onBtnClick() {
-
+  const handleDraw = (drawSrc) => {
+    props.onChange(drawSrc);
   }
 
-  render() {
-    return (
-      <div>
-        <div className={classNames.tools}>
-          <button
+  return (
+    <Grid item xs={6}>
+      <Grid container ref={canvasGrid} direction="column" justifyContent="space-between" alignItems="stretch" >
+        <CanvasDraw
+          ref={canvasRef}
+          hideGrid={true}
+          brushColor="#1F1F1F"
+          brushRadius={5}
+          lazyRadius={0}
+          canvasWidth="100%"
+          canvasHeight={useParentWidthSize(canvasGrid)}
+          style={{
+            border: "1px solid black",
+            aspectRatio: 1
+          }}
+        />
+        <div className={classes.buttons}>
+          <IconButton aria-label="delete"
             onClick={() => {
-              localStorage.setItem(
-                "savedDrawing",
-                this.saveableCanvas.getSaveData()
-              );
+              canvasRef.current.clear();
+            }}
+          >
+            <DeleteIcon />
+          </IconButton>
+          <IconButton
+            onClick={() => {
+              canvasRef.current.undo();
+            }}
+          >
+            <UndoIcon />
+          </IconButton>
+          <Button color="primary"
+            onMouseDown={() => {
+              handleDraw(canvasRef.current.canvasContainer.children[1].toDataURL())
+              canvasRef.current.clear();
             }}
           >
             Save
-          </button>
-          <button
-            onClick={() => {
-              this.saveableCanvas.clear();
-            }}
-          >
-            Clear
-          </button>
-          <button
-            onClick={() => {
-              this.saveableCanvas.undo();
-            }}
-          >
-            Undo
-          </button>
-
+          </Button>
         </div>
-        <CanvasDraw
-          ref={canvasDraw => (this.saveableCanvas = canvasDraw)}
-          hideGrid={true}
-          brushColor={this.state.color}
-          brushRadius={this.state.brushRadius}
-          lazyRadius={0}
-          canvasWidth={this.state.width}
-          canvasHeight={this.state.height}
-        />
-      </div>
-    );
-  }
+      </Grid>
+    </Grid>
+  )
 }
-
-export default Drawing;

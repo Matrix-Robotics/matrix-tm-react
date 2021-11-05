@@ -11,6 +11,7 @@ import ImageListItem from '@material-ui/core/ImageListItem';
 import GestureIcon from '@material-ui/icons/Gesture';
 import VideocamOutlinedIcon from '@material-ui/icons/VideocamOutlined';
 import { makeStyles } from '@material-ui/core/styles';
+
 import Drawing from "./draw/Draw";
 
 const useStyles = makeStyles((theme) => ({
@@ -50,28 +51,28 @@ function WebcamCapture(props) {
   }
 
   const capture = (e) => {
-    if (webcamRef.current.getScreenshot()) {
-      const imageSrc = webcamRef.current.getScreenshot();
-      handleCapture(e, imageSrc);
-    }
+    const imageSrc = webcamRef.current.getScreenshot();
+    if(imageSrc) handleCapture(e, imageSrc);
   };
 
   return (
-    <Grid container direction="column" justifyContent="space-between" alignItems="stretch" >
-      <Webcam
-        audio={false}
-        ref={webcamRef}
-        id="webcam"
-        screenshotFormat="image/jpeg"
-        forceScreenshotSourceSize="true"
-        width={224}
-        style={{
-          width: "100%"
-        }}
-      />
-      <Button variant="contained" color="primary" size="medium" onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
-        Capture Photo
-      </Button>
+    <Grid item xs={6}>
+      <Grid container direction="column" justifyContent="space-between" alignItems="stretch" >
+        <Webcam
+          audio={false}
+          ref={webcamRef}
+          id="webcam"
+          screenshotFormat="image/jpeg"
+          forceScreenshotSourceSize="true"
+          width={224}
+          style={{
+            width: "100%"
+          }}
+        />
+        <Button variant="contained" color="primary" size="medium" onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
+          Capture Photo
+        </Button>
+      </Grid>
     </Grid>
   );
 };
@@ -116,9 +117,13 @@ export default function Capture(props) {
     setSelectedFiles((prevImages) => prevImages.concat(src));
   };
 
-  const handleDraw = () => {
+  const handleCanvas = () => {
     setToggleWebcam(false);
     setToggleDraw(prevState => !prevState);
+  };
+
+  const handleDraw = (src) => {
+    setSelectedFiles((prevImages) => prevImages.concat(src));
   };
 
   const handleUpload = (e) => {
@@ -164,8 +169,8 @@ export default function Capture(props) {
   return (
     <Box className={classes.root} key={props.cardId}>
       <Grid container spacing={2} direction="row" justifyContent="space-between" alignItems="flex-start" >
-        {toggleWebcam ? <Grid item xs={6}><WebcamCapture onChange={handleCapture} /></Grid> : null}
-        {toggleDraw ? <Drawing /> : null}
+        {toggleWebcam && <WebcamCapture onChange={handleCapture} />}
+        {toggleDraw && <Drawing onChange={handleDraw}/>}
         <Grid item xs={6} overflow="visible" >
           <Typography>
             Add Image Samples:
@@ -186,7 +191,7 @@ export default function Capture(props) {
           </Button>
         </Box>
         <Box p={0.5}>
-          <Button variant="outlined" size="large" color="primary" onClick={handleDraw} startIcon={<GestureIcon />}>
+          <Button variant="outlined" size="large" color="primary" onClick={handleCanvas} startIcon={<GestureIcon />}>
             Draw
           </Button>
         </Box>

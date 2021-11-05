@@ -473,6 +473,7 @@ export default function Interface() {
                     type="number"
                     variant="outlined"
                     size="small"
+                    inputProps={{step: 0.001}}
                   />
                 </div>
                 <Button size="small" color="primary" endIcon={<RotateLeftIcon />} disableElevation>
