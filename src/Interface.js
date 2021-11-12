@@ -12,6 +12,8 @@ import CardHeader from '@material-ui/core/CardHeader';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Menu from '@material-ui/core/Menu';
+import Select from '@material-ui/core/Select';
+import Slider from '@material-ui/core/Slider';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
@@ -127,11 +129,12 @@ let parameters = tmImage.TrainingParameters = {
 
 async function train(cards) {
   // training graph settings
-  const metrics = ['loss', 'val_loss', 'acc', 'val_acc']
+  const metrics = ['acc', 'val_acc', 'loss', 'val_loss']
   const container = {
+    tab: "GGG",
     name: 'Model Training',
     styles: {
-      height: '1000px'
+      height: '80%'
     }
   };
   const fitCallbacks = tfvis.show.fitCallbacks(container, metrics)
@@ -421,13 +424,15 @@ export default function Interface() {
 
   function TrainColumn(props) {
     const width = useParentWidthSize(props);
+    const [splitValue, setsplitValue] = React.useState(0.1);
     const [epochsValue, setEpochsValue] = React.useState("50");
     const [batchValue, setBatchValue] = React.useState("16");
     const [lRateValue, setLRateValue] = React.useState("0.001");
-    const [isShowGraph, setisShowGraph] = React.useState(false);
+    const [isShowGraph, setisShowGraph] = React.useState(true);
 
     // Reset Training Parameters
     const resetAllValues = () => {
+      setsplitValue("0.1");
       setEpochsValue("50");
       setBatchValue("16");
       setLRateValue("0.001");
@@ -447,10 +452,10 @@ export default function Interface() {
     };
 
     const handleGraph = () => {
-      setisShowGraph((prev) => !prev);
-      console.log(isShowGraph);
-      tfvis.show.modelSummary({ name: 'Model Architecture' }, classifier);
+    };
 
+    const handlesplitValue = (event, newValue) => {
+      setsplitValue(newValue);
     };
 
     return (
@@ -494,6 +499,22 @@ export default function Interface() {
               <form className={classes.form}>
                 <div>
                   <Typography>
+                    Train/Test-split:
+                  </Typography>
+                  <Slider
+                    id="train-test-split"
+                    defaultValue={0.1}
+                    valueLabelDisplay="auto"
+                    step={0.1}
+                    marks
+                    min={0}
+                    max={1}
+                    value={splitValue}
+                    onChange={handlesplitValue}
+                  />
+                </div>
+                <div>
+                  <Typography>
                     Epochs:
                   </Typography>
                   <TextField
@@ -510,15 +531,20 @@ export default function Interface() {
                   <Typography>
                     Batch Size:
                   </Typography>
-                  <TextField
+                  <Select
                     id="batch-size"
-                    InputProps={{ inputProps: { min: 4, max: 512 } }}
                     value={batchValue}
-                    type="number"
-                    variant="outlined"
-                    size="small"
                     onChange={(e) => setBatchValue(e.target.value)}
-                  />
+                    displayEmpty
+                    inputProps={{ 'aria-label': 'Without label' }}
+                  >
+                    <MenuItem value="16">16</MenuItem>
+                    <MenuItem value={32}>32</MenuItem>
+                    <MenuItem value={64}>64</MenuItem>
+                    <MenuItem value={128}>128</MenuItem>
+                    <MenuItem value={256}>256</MenuItem>
+                    <MenuItem value={512}>512</MenuItem>
+                  </Select>
                 </div>
                 {/* TODO: Set learning Rate by step: 0.001 */}
                 <div>
