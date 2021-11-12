@@ -33,8 +33,8 @@ import Container from '@material-ui/core/Container';
 import Capture from './Capture.js';
 
 import * as tf from '@tensorflow/tfjs';
-import * as mobilenet from '@tensorflow-models/mobilenet';
-import * as knnClassifier from '@tensorflow-models/knn-classifier';
+import * as tmImage from '@teachablemachine/image';
+import * as tfvis from '@tensorflow/tfjs-vis';
 
 const ITEM_HEIGHT = 80;
 const useStyles = makeStyles((theme) => ({
@@ -93,58 +93,90 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-let net;
-const classifier = knnClassifier.create();
+var classifier;
+
+let modelOptions: tmImage.ModelOptions = {
+  version: 2,
+  checkpointUrl: null,
+  alpha: 1,
+  trainingLayer: 'out_relu',
+};
+
+
+let metadata: tmImage.Metadata = {
+  tfjsVersion: "3.9.0",
+  tmVersion: "0.8.5",
+  packageVersion: "0.1.0",
+  packageName: "matrix-tm-react",
+  modelName: "MobileNet-cp13r",
+  timeStamp: "11-19-2021",
+  labels: [],
+  userMetadata: {},
+  grayscale: false,
+  imageSize: 224,
+};
+
+// TODO: Use real parameters.
+let parameters = tmImage.TrainingParameters = {
+  // denseUnits: Positive integer, dimensionality of the output space.
+  denseUnits: 100,
+  epochs: 50,
+  learningRate: 0.001,
+  batchSize: 16,
+}
 
 async function train(cards) {
-  // Load the model.
-  console.log('Loading mobilenet..');
-  net = await mobilenet.load();
-  console.log('Successfully loaded model');
-
-  // Reads an image from the webcam and associates it with a specific class
-  // index.
-  const addExample = async (classTitle, imgSrc) => {
-    // Get the intermediate activation of MobileNet 'conv_preds' and pass that
-    // to the KNN classifier.
-    const activation = net.infer(imgSrc, true);
-
-    // Pass the intermediate activation to the classifier.
-    classifier.addExample(activation, classTitle);
-
+  // training graph settings
+  const metrics = ['loss', 'val_loss', 'acc', 'val_acc']
+  const container = {
+    name: 'Model Training',
+    styles: {
+      height: '1000px'
+    }
   };
+  const fitCallbacks = tfvis.show.fitCallbacks(container, metrics)
 
-  cards.forEach(card => {
+  // Load the model.
+  classifier = await tmImage.createTeachable(metadata, modelOptions);
+  console.log('Successfully loaded model');
+  // This will call prepareDataset and map title to card index.
+
+  classifier.setLabels(cards.map(({ title }) => title));
+
+  cards.forEach((card, card_index) => {
     let tempImageList = card.imageList;
     if (typeof tempImageList !== 'undefined' && tempImageList.length > 0) {
       tempImageList.forEach(image => {
         // blob to HTMLImageElement
-        let tempImageEl = new Image(200, 200);
+        let tempImageEl = new Image(224, 224);
         tempImageEl.src = image;
-        addExample(card.title, tempImageEl);
+        classifier.addExample(card_index, tempImageEl);
       });
     }
   })
 
+  await classifier.train(parameters, fitCallbacks);
+  console.log(classifier.isTrained)
   return true;
 }
 
 async function preview(webcam) {
-  if (classifier.getNumClasses() > 0) {
-    const webcamRes = await webcam;
-    const img = await webcamRes.capture();
-
-    // Get the activation from mobilenet from the webcam.
-    const activation = net.infer(img, 'conv_preds');
+  if (classifier.numClasses > 0) {
+    // const webcamRes = await webcam;
+    // let img = await webcamRes.capture();
     // Get the most likely class and confidence from the classifier module.
-    const result = await classifier.predictClass(activation);
+    webcam = new tmImage.Webcam(224, 224, false);
+    await webcam.setup();
 
+    let flipped = false;
+    let prediction = await classifier.predict(webcam.canvas, flipped);
     // Dispose the tensor to release the memory.
-    img.dispose();
-
-    return result;
+    console.log(prediction);
+    // img.dispose();
+    return prediction;
   }
 
+  webcam.update();
   await tf.nextFrame();
 }
 
@@ -377,7 +409,9 @@ export default function Interface() {
               )}
             />
             <CardActions className={classes.cardButton}>
-              <Capture key={props.cardId} cardId={props.cardId} imageList={props.imageList} captureEl={captureElList.current[cards.map(card => card.cardId).indexOf(props.cardId)]} onChange={handleImageList} onCameraOn={closeCamera} />
+              <Capture key={props.cardId} cardId={props.cardId} imageList={props.imageList}
+                captureEl={captureElList.current[cards.map(card => card.cardId).indexOf(props.cardId)]}
+                onChange={handleImageList} onCameraOn={closeCamera} />
             </CardActions>
           </Card>
         </Grid>
@@ -387,26 +421,35 @@ export default function Interface() {
 
   function TrainColumn(props) {
     const width = useParentWidthSize(props);
-    const [epochsValue, setEpochsValue] = React.useState("10");
-    const [batchValue, setBatchValue] = React.useState("4");
+    const [epochsValue, setEpochsValue] = React.useState("50");
+    const [batchValue, setBatchValue] = React.useState("16");
     const [lRateValue, setLRateValue] = React.useState("0.001");
+    const [isShowGraph, setisShowGraph] = React.useState(false);
 
-    // Reset Input Field handler
+    // Reset Training Parameters
     const resetAllValues = () => {
-      setEpochsValue("10");
-      setBatchValue("4");
+      setEpochsValue("50");
+      setBatchValue("16");
       setLRateValue("0.001");
     };
 
     const handleTrain = () => {
-
       props.captureEl.current.forEach(f => f.current.forEach(f => f()));
+      // Check is total sample count > 0
+      // TODO: ZeroSampleError
+      if (cards.map(({ imageList }) => imageList).flat(1).length > 0) {
+        setIsTraining((prev) => !prev);
 
-      setIsTraining((prev) => !prev);
+        train(cards).then(res => {
+          setIsTrained(res);
+        });
+      }
+    };
 
-      train(cards).then(res => {
-        setIsTrained(res);
-      });
+    const handleGraph = () => {
+      setisShowGraph((prev) => !prev);
+      console.log(isShowGraph);
+      tfvis.show.modelSummary({ name: 'Model Architecture' }, classifier);
 
     };
 
@@ -492,7 +535,7 @@ export default function Interface() {
                     value={lRateValue}
                     variant="outlined"
                     size="small"
-                    inputProps={{step: 0.001}}
+                    inputProps={{ step: 0.001 }}
                     onChange={(e) => setLRateValue(parseFloat(e.target.value).toFixed(1))}
                   />
 
@@ -500,7 +543,10 @@ export default function Interface() {
                 <Button onClick={resetAllValues} size="small" color="primary" endIcon={<RotateLeftIcon />} disableElevation>
                   Reset Default
                 </Button>
-                <Button size="small" color="primary" endIcon={<AssessmentOutlinedIcon />} disableElevation>
+                <Button size="small" color="primary" endIcon={<AssessmentOutlinedIcon />}
+                  onClick={() => {
+                    handleGraph()
+                  }}>
                   Graph
                 </Button>
               </form>
@@ -560,15 +606,15 @@ export default function Interface() {
       return webcam
     }
 
-    const startPreview = React.useCallback((webcam) => {
-      let result = preview(webcam);
-
-      result.then(res => {
-        if (res.label !== "") {
-          let confidences = res.confidences;
-          setState(state => ({ ...state, predictClasses: confidences }));
-        }
-      });
+    const startPreview = React.useCallback(async (webcam) => {
+      let prediction = preview(webcam);
+      // TODO: Needs to show predict prediction
+      // prediction.then(res => {
+      //   if (res.label !== "") {
+      //     let probability = res.probability;
+      //     setState(state => ({ ...state, predictClasses: probability }));
+      //   }
+      // });
 
       if (state.inputSrc) setPreviewHandler(setTimeout(startPreview, 100, webcam))
     }, [state.inputSrc]);
@@ -623,7 +669,7 @@ export default function Interface() {
           </CardActions>
           :
           <Typography>
-            You can preview the result here after training a model on the left.
+            You can preview the prediction here after training a model on the left.
           </Typography>
         }
         {state.inputSrc ?
