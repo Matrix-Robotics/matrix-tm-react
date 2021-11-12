@@ -29,6 +29,13 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+// For more information on facingMode, 
+// please see the MDN web docs https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints/facingMode
+const videoConstraints = {
+  width: 224,
+  height: 224,
+  facingMode: "user"
+};
 
 function WebcamCapture(props) {
 
@@ -52,7 +59,7 @@ function WebcamCapture(props) {
 
   const capture = (e) => {
     const imageSrc = webcamRef.current.getScreenshot();
-    if(imageSrc) handleCapture(e, imageSrc);
+    if (imageSrc) handleCapture(e, imageSrc);
   };
 
   return (
@@ -64,10 +71,10 @@ function WebcamCapture(props) {
           id="webcam"
           screenshotFormat="image/jpeg"
           forceScreenshotSourceSize="true"
-          width={224}
           style={{
             width: "100%"
           }}
+          videoConstraints={videoConstraints}
         />
         <Button variant="contained" color="primary" size="medium" onMouseDown={handleMouseDown} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}>
           Capture Photo
@@ -88,9 +95,9 @@ export default function Capture(props) {
   const [alertPerm, setAlertPerm] = React.useState(false);
 
   const handleWebcam = () => {
-    if(toggleWebcam) {
+    if (toggleWebcam) {
       setToggleWebcam(prevState => !prevState);
-      
+
     } else {
       props.onCameraOn();
 
@@ -170,7 +177,7 @@ export default function Capture(props) {
     <Box className={classes.root} key={props.cardId}>
       <Grid container spacing={2} direction="row" justifyContent="space-between" alignItems="flex-start" >
         {toggleWebcam && <WebcamCapture onChange={handleCapture} />}
-        {toggleDraw && <Drawing onChange={handleDraw}/>}
+        {toggleDraw && <Drawing onChange={handleDraw} />}
         <Grid item xs={6} overflow="visible" >
           <Typography>
             Add Image Samples:
