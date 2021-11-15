@@ -24,7 +24,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Edit from "@material-ui/icons/Edit";
 import PublishRoundedIcon from '@material-ui/icons/PublishRounded';
-import GetAppRoundedIcon from '@material-ui/icons/GetAppRounded';
+import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 import AssessmentOutlinedIcon from '@material-ui/icons/AssessmentOutlined';
 import IconButton from '@material-ui/core/IconButton';
@@ -490,7 +490,7 @@ export default function Interface() {
             }
           </CardActions>
           <CardActions className={classes.cardButton}>
-            <Button variant="contained" size="large" fullWidth={true} startIcon={<GetAppRoundedIcon />} disableElevation>
+            <Button variant="contained" size="large" fullWidth={true} startIcon={<ExitToAppRoundedIcon />} disableElevation>
               Import Model
             </Button>
           </CardActions>
