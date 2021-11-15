@@ -23,7 +23,8 @@ import Switch from '@material-ui/core/Switch';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Edit from "@material-ui/icons/Edit";
-import PublishIcon from '@material-ui/icons/Publish';
+import PublishRoundedIcon from '@material-ui/icons/PublishRounded';
+import GetAppRoundedIcon from '@material-ui/icons/GetAppRounded';
 import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 import AssessmentOutlinedIcon from '@material-ui/icons/AssessmentOutlined';
 import IconButton from '@material-ui/core/IconButton';
@@ -35,8 +36,8 @@ import Container from '@material-ui/core/Container';
 import Capture from './Capture.js';
 
 import * as tf from '@tensorflow/tfjs';
-import * as tmImage from '@teachablemachine/image';
 import * as tfvis from '@tensorflow/tfjs-vis';
+import * as tmImage from '@teachablemachine/image';
 
 const ITEM_HEIGHT = 80;
 const useStyles = makeStyles((theme) => ({
@@ -95,7 +96,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-var classifier;
+let classifier;
 
 let modelOptions: tmImage.ModelOptions = {
   version: 2,
@@ -139,6 +140,7 @@ async function train(cards) {
   };
   const fitCallbacks = tfvis.show.fitCallbacks(container, metrics)
 
+  console.log(metadata);
   // Load the model.
   classifier = await tmImage.createTeachable(metadata, modelOptions);
   console.log('Successfully loaded model');
@@ -424,15 +426,15 @@ export default function Interface() {
 
   function TrainColumn(props) {
     const width = useParentWidthSize(props);
-    const [splitValue, setsplitValue] = React.useState(0.1);
+    const [splitValue, setSplitValue] = React.useState(0.9);
     const [epochsValue, setEpochsValue] = React.useState("50");
     const [batchValue, setBatchValue] = React.useState("16");
     const [lRateValue, setLRateValue] = React.useState("0.001");
-    const [isShowGraph, setisShowGraph] = React.useState(true);
+    const [isShowGraph, setIsShowGraph] = React.useState(true);
 
     // Reset Training Parameters
     const resetAllValues = () => {
-      setsplitValue("0.1");
+      setSplitValue("0.9");
       setEpochsValue("50");
       setBatchValue("16");
       setLRateValue("0.001");
@@ -454,8 +456,8 @@ export default function Interface() {
     const handleGraph = () => {
     };
 
-    const handlesplitValue = (event, newValue) => {
-      setsplitValue(newValue);
+    const handleSplitValue = (event, newValue) => {
+      setSplitValue(newValue);
     };
 
     return (
@@ -487,6 +489,11 @@ export default function Interface() {
               </Button>
             }
           </CardActions>
+          <CardActions className={classes.cardButton}>
+            <Button variant="contained" size="large" fullWidth={true} startIcon={<GetAppRoundedIcon />} disableElevation>
+              Import Model
+            </Button>
+          </CardActions>
           <Accordion>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
@@ -510,7 +517,7 @@ export default function Interface() {
                     min={0}
                     max={1}
                     value={splitValue}
-                    onChange={handlesplitValue}
+                    onChange={handleSplitValue}
                   />
                 </div>
                 <div>
@@ -561,8 +568,8 @@ export default function Interface() {
                     value={lRateValue}
                     variant="outlined"
                     size="small"
-                    inputProps={{ step: 0.001 }}
-                    onChange={(e) => setLRateValue(parseFloat(e.target.value).toFixed(1))}
+                    inputProps={{step: 0.001}}
+                    onChange={(e) => setLRateValue(parseFloat(e.target.value).toFixed(3))}
                   />
 
                 </div>
@@ -714,7 +721,7 @@ export default function Interface() {
       <React.Fragment>
         <Card style={{ width: width }} className={classes.cardCenter}>
           <CardHeader title="Preview" action={
-            <Button variant="contained" size="large" fullWidth={true} startIcon={<PublishIcon />} disableElevation>
+            <Button variant="contained" size="large" fullWidth={true} startIcon={<PublishRoundedIcon />} disableElevation>
               Export Model
             </Button>
           } />
