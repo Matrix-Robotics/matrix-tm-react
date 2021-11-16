@@ -96,7 +96,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-let classifier;
+let classifier, webcam;
 
 let modelOptions: tmImage.ModelOptions = {
   version: 2,
@@ -142,6 +142,7 @@ async function train(cards) {
 
   console.log(metadata);
   // Load the model.
+  // TODO: To load pre-trained model in "Train"
   classifier = await tmImage.createTeachable(metadata, modelOptions);
   console.log('Successfully loaded model');
   // This will call prepareDataset and map title to card index.
@@ -165,14 +166,12 @@ async function train(cards) {
   return true;
 }
 
-async function preview(webcam) {
+async function preview() {
   if (classifier.numClasses > 0) {
     // const webcamRes = await webcam;
     // let img = await webcamRes.capture();
     // Get the most likely class and confidence from the classifier module.
-    webcam = new tmImage.Webcam(224, 224, false);
-    await webcam.setup();
-
+    
     let flipped = false;
     let prediction = await classifier.predict(webcam.canvas, flipped);
     // Dispose the tensor to release the memory.
@@ -180,9 +179,7 @@ async function preview(webcam) {
     // img.dispose();
     return prediction;
   }
-
-  webcam.update();
-  await tf.nextFrame();
+  // await tf.nextFrame();
 }
 
 
@@ -193,7 +190,6 @@ export default function Interface() {
   const captureElList = React.useRef([]);
   const trainGrid = React.useRef(null);
   const previewGrid = React.useRef(null);
-  const previewCamRef = React.useRef(null);
 
   const [isTraining, setIsTraining] = React.useState(false);
   const [isTrained, setIsTrained] = React.useState(false);
@@ -599,16 +595,16 @@ export default function Interface() {
           <Box key={index} display="flex" alignItems="center">
             <Box minWidth="15%">
               <Typography variant="body2" color="textSecondary">
-                {predictClass[0]}
+                {predictClass[1].className}
               </Typography>
             </Box>
             <Box minWidth="75%" mr={1}>
-              <LinearProgress classes={props.color} variant="determinate" value={predictClass[1] * 100} />
+              <LinearProgress classes={props.color} variant="determinate" value={predictClass[1].probability * 100} />
             </Box>
             <Box minWidth="10%">
               <Typography variant="body2" color="textSecondary">
                 {`${Math.round(
-                  predictClass[1] * 100
+                  predictClass[1].probability * 100
                 )}%`
                 }
               </Typography>
@@ -634,51 +630,54 @@ export default function Interface() {
     };
 
     async function loadWebEl() {
-      const webcamEl = document.getElementById('webcam');
-      const webcam = await tf.data.webcam(webcamEl);
-      return webcam
+      webcam = new tmImage.Webcam(224, 224, false);
+      await webcam.setup();
+
+      webcam.play();
+
+      
+      // const webcamEl = document.getElementById('webcam');
+      // const webcam = await tf.data.webcam(webcamEl);
+      // return webcam
     }
 
-    const startPreview = React.useCallback(async (webcam) => {
-      let prediction = preview(webcam);
-      // TODO: Needs to show predict prediction
-      // prediction.then(res => {
-      //   if (res.label !== "") {
-      //     let probability = res.probability;
-      //     setState(state => ({ ...state, predictClasses: probability }));
-      //   }
-      // });
+    const previewLoop = React.useCallback(() => {
+      webcam.update(); // update the webcam frame
 
-      if (state.inputSrc) setPreviewHandler(setTimeout(startPreview, 100, webcam))
+      let prediction = preview();
+      console.log(prediction);
+      prediction.then(res => {
+        if (res.label !== "") {
+          let probability = res;
+          console.log("fuck")
+          console.log(probability);
+          setState(state => ({ ...state, predictClasses: probability }));
+        }
+      });
+
+      if (state.inputSrc) setPreviewHandler(setTimeout(previewLoop, 100))
     }, [state.inputSrc]);
 
     React.useEffect(() => {
       if (isTrained) {
-        const webcam = loadWebEl();
-        if (state.inputSrc) {
-          startPreview(webcam);
-        }
+        let webcamLoaded = loadWebEl();
+
+        webcamLoaded.then(() => {
+          if (state.inputSrc) {
+            document.getElementById("previewCam").appendChild(webcam.canvas);
+            previewLoop();
+          }
+        })
       }
       return () => {
       };
-    }, [startPreview, state.inputSrc]);
+    }, [previewLoop, state.inputSrc]);
 
     return (
       <Grid container direction="column" justifyContent="space-between" alignItems="stretch" >
         {isTrained ?
           <CardActions className={classes.cardButton}>
-            <Webcam
-              audio={false}
-              ref={previewCamRef}
-              id="webcam"
-              screenshotFormat="image/jpeg"
-              forceScreenshotSourceSize="true"
-              width="224"
-              height="224"
-              style={{
-                width: "100%"
-              }}
-            />
+            <div id="previewCam" />
             <FormGroup row>
               <Box>
                 <Typography>
