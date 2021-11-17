@@ -669,6 +669,13 @@ export default function Interface() {
             document.getElementById("previewCam").appendChild(webcam.canvas);
             previewLoop();
           }
+          //   } else {
+          //   // Delete old canvas when InputSrc is false.
+          //   const oldcanv = document.getElementById('previewCam')
+          //   if (oldcanv.hasChildNodes()) {
+          //     oldcanv.innerHTML = '';
+          //   }
+          // }
         })
       }
       return () => {
