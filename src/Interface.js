@@ -167,19 +167,21 @@ async function train(cards) {
 }
 
 async function preview() {
-  if (classifier.numClasses > 0) {
-    // const webcamRes = await webcam;
-    // let img = await webcamRes.capture();
-    // Get the most likely class and confidence from the classifier module.
+  if (classifier) {
+    if (classifier.numClasses > 0) {
+      // const webcamRes = await webcam;
+      // let img = await webcamRes.capture();
+      // Get the most likely class and confidence from the classifier module.
 
-    let flipped = false;
-    let prediction = await classifier.predict(webcam.canvas, flipped);
-    // Dispose the tensor to release the memory.
-    console.log(prediction);
-    // img.dispose();
-    return prediction;
+      let flipped = false;
+      let prediction = await classifier.predict(webcam.canvas, flipped);
+      // Dispose the tensor to release the memory.
+      console.log(prediction);
+      // img.dispose();
+      return prediction;
+    }
+    // await tf.nextFrame();
   }
-  // await tf.nextFrame();
 }
 
 
