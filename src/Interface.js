@@ -171,7 +171,7 @@ async function preview() {
     // const webcamRes = await webcam;
     // let img = await webcamRes.capture();
     // Get the most likely class and confidence from the classifier module.
-    
+
     let flipped = false;
     let prediction = await classifier.predict(webcam.canvas, flipped);
     // Dispose the tensor to release the memory.
@@ -430,7 +430,7 @@ export default function Interface() {
 
     // Reset Training Parameters
     const resetAllValues = () => {
-      setSplitValue("0.9");
+      setSplitValue(0.9);
       setEpochsValue("50");
       setBatchValue("16");
       setLRateValue("0.001");
@@ -506,7 +506,7 @@ export default function Interface() {
                   </Typography>
                   <Slider
                     id="train-test-split"
-                    defaultValue={0.1}
+                    defaultValue={0.9}
                     valueLabelDisplay="auto"
                     step={0.1}
                     marks
@@ -564,7 +564,7 @@ export default function Interface() {
                     value={lRateValue}
                     variant="outlined"
                     size="small"
-                    inputProps={{step: 0.001}}
+                    inputProps={{ step: 0.001 }}
                     onChange={(e) => setLRateValue(parseFloat(e.target.value).toFixed(3))}
                   />
 
@@ -635,7 +635,7 @@ export default function Interface() {
 
       webcam.play();
 
-      
+
       // const webcamEl = document.getElementById('webcam');
       // const webcam = await tf.data.webcam(webcamEl);
       // return webcam
