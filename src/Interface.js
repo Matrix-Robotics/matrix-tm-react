@@ -617,8 +617,8 @@ export default function Interface() {
 
   function PreviewCam(props) {
 
-    // const [barColor, setBarColor] = React.useState(barActiveColor);
-    const [previewHandler, setPreviewHandler] = React.useState(1);
+    const [webcamEl, setWebcamEl] = React.useState();
+    const [timeoutHandler, setTimeoutHandler] = React.useState(1);
     const [state, setState] = React.useState({
       inputSrc: false,
       predictClasses: {}
@@ -626,7 +626,7 @@ export default function Interface() {
 
     const handleCheck = (event) => {
       setState({ ...state, [event.target.name]: event.target.checked });
-      clearTimeout(previewHandler);
+      clearTimeout(timeoutHandler);
     };
 
     async function loadWebEl() {
@@ -649,13 +649,12 @@ export default function Interface() {
       prediction.then(res => {
         if (res.label !== "") {
           let probability = res;
-          console.log("fuck")
           console.log(probability);
           setState(state => ({ ...state, predictClasses: probability }));
         }
       });
 
-      if (state.inputSrc) setPreviewHandler(setTimeout(previewLoop, 100))
+      if (state.inputSrc) setTimeoutHandler(setTimeout(previewLoop, 100))
     }, [state.inputSrc]);
 
     React.useEffect(() => {
@@ -664,7 +663,8 @@ export default function Interface() {
 
         webcamLoaded.then(() => {
           if (state.inputSrc) {
-            document.getElementById("previewCam").appendChild(webcam.canvas);
+            setWebcamEl(webcam.canvas);
+            console.log(webcamEl)
             previewLoop();
           }
         })
@@ -677,7 +677,7 @@ export default function Interface() {
       <Grid container direction="column" justifyContent="space-between" alignItems="stretch" >
         {isTrained ?
           <CardActions className={classes.cardButton}>
-            <div id="previewCam" />
+            {{webcamEl}}
             <FormGroup row>
               <Box>
                 <Typography>
