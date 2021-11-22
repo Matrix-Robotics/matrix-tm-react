@@ -1,5 +1,4 @@
 import React from 'react';
-import Webcam from "react-webcam";
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
@@ -169,18 +168,13 @@ async function train(cards) {
 async function preview() {
   if (classifier) {
     if (classifier.numClasses > 0) {
-      // const webcamRes = await webcam;
-      // let img = await webcamRes.capture();
-      // Get the most likely class and confidence from the classifier module.
 
       let flipped = false;
       let prediction = await classifier.predict(webcam.canvas, flipped);
-      // Dispose the tensor to release the memory.
-      console.log(prediction);
-      // img.dispose();
+
       return prediction;
+
     }
-    // await tf.nextFrame();
   }
 }
 
@@ -189,6 +183,7 @@ export default function Interface() {
 
   const classes = useStyles();
 
+  const webcamCanvas = React.useRef(null);
   const captureElList = React.useRef([]);
   const trainGrid = React.useRef(null);
   const previewGrid = React.useRef(null);
@@ -490,7 +485,7 @@ export default function Interface() {
       const weightsUpload = document.getElementById('weights-upload');
 
 
-      if (jsonUpload.files.length == 1 & weightsUpload.files.length == 1) {
+      if (jsonUpload.files.length === 1 & weightsUpload.files.length === 1) {
         console.log(jsonUpload.files[0]);
         console.log(weightsUpload.files[0]);
         const classifier = await tmImage.load(jsonUpload.files[0], weightsUpload.files[0]);
@@ -672,8 +667,7 @@ export default function Interface() {
 
   function PreviewCam(props) {
 
-    // const [barColor, setBarColor] = React.useState(barActiveColor);
-    const [previewHandler, setPreviewHandler] = React.useState(1);
+    const [timeoutHandler, setTimeoutHandler] = React.useState(1);
     const [state, setState] = React.useState({
       inputSrc: false,
       predictClasses: {}
@@ -681,7 +675,7 @@ export default function Interface() {
 
     const handleCheck = (event) => {
       setState({ ...state, [event.target.name]: event.target.checked });
-      clearTimeout(previewHandler);
+      clearTimeout(timeoutHandler);
     };
 
     async function loadWebEl() {
@@ -689,9 +683,6 @@ export default function Interface() {
       await webcam.setup();
 
       webcam.play();
-      // const webcamEl = document.getElementById('webcam');
-      // const webcam = await tf.data.webcam(webcamEl);
-      // return webcam
     }
 
     const previewLoop = React.useCallback(() => {
@@ -702,13 +693,12 @@ export default function Interface() {
       prediction.then(res => {
         if (res.label !== "") {
           let probability = res;
-          console.log("fuck")
           console.log(probability);
           setState(state => ({ ...state, predictClasses: probability }));
         }
       });
 
-      if (state.inputSrc) setPreviewHandler(setTimeout(previewLoop, 100))
+      if (state.inputSrc) setTimeoutHandler(setTimeout(previewLoop, 100))
     }, [state.inputSrc]);
 
     React.useEffect(() => {
@@ -717,8 +707,10 @@ export default function Interface() {
 
         webcamLoaded.then(() => {
           if (state.inputSrc) {
-            document.getElementById("previewCam").appendChild(webcam.canvas);
+            webcamCanvas.current.appendChild(webcam.canvas);
             previewLoop();
+          } else {
+            webcamCanvas.current.innerHTML = '';
           }
           //   } else {
           //   // Delete old canvas when InputSrc is false.
@@ -737,7 +729,7 @@ export default function Interface() {
       <Grid container direction="column" justifyContent="space-between" alignItems="stretch" >
         {isTrained ?
           <CardActions className={classes.cardButton}>
-            <div id="previewCam" />
+            <dev ref={webcamCanvas}></dev>
             <FormGroup row>
               <Box>
                 <Typography>
