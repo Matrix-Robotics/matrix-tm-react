@@ -128,6 +128,12 @@ let parameters = tmImage.TrainingParameters = {
   batchSize: 16,
 }
 
+async function loadPretrained() {
+  // Load the model.
+  // TODO: To load pre-trained model in "Train"
+  classifier = await tmImage.createTeachable(metadata, modelOptions);
+}
+
 async function train(cards) {
   // training graph settings
   const metrics = ['acc', 'val_acc', 'loss', 'val_loss']
@@ -139,10 +145,6 @@ async function train(cards) {
     }
   };
   const fitCallbacks = tfvis.show.fitCallbacks(container, metrics)
-  // Load the model.
-  // TODO: To load pre-trained model in "Train"
-  classifier = await tmImage.createTeachable(metadata, modelOptions);
-  console.log('Successfully loaded model');
   // This will call prepareDataset and map title to card index.
 
   classifier.setLabels(cards.map(({ title }) => title));
@@ -202,6 +204,11 @@ export default function Interface() {
       imageList: []
     }
   ]);
+
+  React.useEffect(() => {
+    // Load the model
+    loadPretrained();
+  }, [])
 
   React.useEffect(() => {
     if (captureElList.current.length !== cards.length) {
