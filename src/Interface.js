@@ -33,6 +33,7 @@ import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
+
 import Capture from './Capture.js';
 
 import * as tf from '@tensorflow/tfjs';
@@ -139,8 +140,6 @@ async function train(cards) {
     }
   };
   const fitCallbacks = tfvis.show.fitCallbacks(container, metrics)
-
-  console.log(metadata);
   // Load the model.
   // TODO: To load pre-trained model in "Train"
   classifier = await tmImage.createTeachable(metadata, modelOptions);
@@ -161,8 +160,9 @@ async function train(cards) {
     }
   })
 
+  // TODO: Use Real parameters.
   await classifier.train(parameters, fitCallbacks);
-  console.log(classifier.isTrained)
+  console.log(classifier);
   return true;
 }
 
@@ -458,6 +458,49 @@ export default function Interface() {
       setSplitValue(newValue);
     };
 
+    let jsonUploadFile, weightsUploadFile;
+
+    const handleUploadJson = (e) => {
+      // console.log(e.target.files[0]);
+      console.log(e.target.files[0]);
+      if (e.target.files[0].name.includes('json')) {
+        jsonUploadFile = e.target.files[0];
+      }
+      if (weightsUploadFile && jsonUploadFile) {
+        handleUploadModel();
+      }
+    };
+
+    const handleUploadWeight = (e) => {
+      // console.log(e.target.files[0]);
+      console.log(e.target.files[0]);
+      if (e.target.files[0].name.includes('bin')) {
+        weightsUploadFile = e.target.files[0];
+      }
+      console.log(weightsUploadFile);
+      console.log(jsonUploadFile);
+
+      if (weightsUploadFile && jsonUploadFile) {
+        handleUploadModel();
+      }
+    };
+
+    async function handleUploadModel() {
+      const jsonUpload = document.getElementById('json-upload');
+      const weightsUpload = document.getElementById('weights-upload');
+
+
+      if (jsonUpload.files.length == 1 & weightsUpload.files.length == 1) {
+        console.log(jsonUpload.files[0]);
+        console.log(weightsUpload.files[0]);
+        const classifier = await tmImage.load(jsonUpload.files[0], weightsUpload.files[0]);
+        // const classifier = await tmImage.loadFromFiles(jsonUpload.files[0], weightsUpload.files[0]);
+        // const classifier = await tf.loadLayersModel(
+        //   tf.io.browserFiles([jsonUpload.files[0], weightsUpload.files[0]]), metadata);
+        console.log(classifier);
+      }
+    }
+
     return (
       <React.Fragment>
         <Card style={{ width: width }} className={classes.cardCenter} >
@@ -488,9 +531,19 @@ export default function Interface() {
             }
           </CardActions>
           <CardActions className={classes.cardButton}>
-            <Button variant="contained" size="large" fullWidth={true} startIcon={<ExitToAppRoundedIcon />} disableElevation>
-              Import Model
+            <Button variant="contained" size="large" fullWidth={true}
+              component="label" startIcon={<ExitToAppRoundedIcon />} onChange={handleUploadModel}
+            >
+              <input id="json-upload" type="file" hidden />
+              Upload Json
             </Button>
+            <Button variant="contained" size="large" fullWidth={true}
+              component="label" startIcon={<ExitToAppRoundedIcon />} onChange={handleUploadModel}
+            >
+              <input id="weights-upload" type="file" hidden />
+              Upload Weights
+            </Button>
+
           </CardActions>
           <Accordion>
             <AccordionSummary
@@ -636,8 +689,6 @@ export default function Interface() {
       await webcam.setup();
 
       webcam.play();
-
-
       // const webcamEl = document.getElementById('webcam');
       // const webcam = await tf.data.webcam(webcamEl);
       // return webcam
@@ -725,11 +776,22 @@ export default function Interface() {
   function PreviewColumn(props) {
     const width = useParentWidthSize(props);
 
+    async function handleExportModel() {
+      if (classifier) {
+        // const exportConfig: tf.io.SaveConfig = {
+        //   "trainableOnly": true,
+        //   "includeOptimizer": true,
+        // };
+
+        await classifier.save('downloads://image-model');
+      }
+    }
+
     return (
       <React.Fragment>
         <Card style={{ width: width }} className={classes.cardCenter}>
           <CardHeader title="Preview" action={
-            <Button variant="contained" size="large" fullWidth={true} startIcon={<PublishRoundedIcon />} disableElevation>
+            <Button variant="contained" size="large" fullWidth={true} onClick={handleExportModel} startIcon={<PublishRoundedIcon />} disableElevation>
               Export Model
             </Button>
           } />
