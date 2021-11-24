@@ -1,4 +1,6 @@
 import React from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
@@ -9,32 +11,35 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardHeader from '@material-ui/core/CardHeader';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import Container from '@material-ui/core/Container';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import Menu from '@material-ui/core/Menu';
-import Select from '@material-ui/core/Select';
-import Slider from '@material-ui/core/Slider';
-import MenuItem from '@material-ui/core/MenuItem';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
-import LinearProgress from '@material-ui/core/LinearProgress';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-import Edit from "@material-ui/icons/Edit";
-import PublishRoundedIcon from '@material-ui/icons/PublishRounded';
-import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import RotateLeftIcon from '@material-ui/icons/RotateLeft';
-import AssessmentOutlinedIcon from '@material-ui/icons/AssessmentOutlined';
-import IconButton from '@material-ui/core/IconButton';
-import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 import Grid from '@material-ui/core/Grid';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
+import IconButton from '@material-ui/core/IconButton';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
+import Select from '@material-ui/core/Select';
+import Slider from '@material-ui/core/Slider';
+import Switch from '@material-ui/core/Switch';
+import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
+
+import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
+import AssessmentOutlinedIcon from '@material-ui/icons/AssessmentOutlined';
+import EditRoundedIcon from '@material-ui/icons/EditRounded';
+import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
+import PublishRoundedIcon from '@material-ui/icons/PublishRounded';
+import RotateLeftIcon from '@material-ui/icons/RotateLeft';
+
+import ToggleButton from '@material-ui/lab/ToggleButton';
+import ToggleButtonGroup from '@material-ui/lab/ToggleButtonGroup';
 
 import Capture from './Capture.js';
 
-import * as tf from '@tensorflow/tfjs';
+// import * as tf from '@tensorflow/tfjs';
 import * as tfvis from '@tensorflow/tfjs-vis';
 import * as tmImage from '@teachablemachine/image';
 
@@ -128,8 +133,7 @@ let parameters = tmImage.TrainingParameters = {
 }
 
 async function loadPretrained() {
-  // Load the model.
-  // TODO: To load pre-trained model in "Train"
+  // Load the model from remote server
   classifier = await tmImage.createTeachable(metadata, modelOptions);
 }
 
@@ -164,7 +168,7 @@ async function train(cards) {
   })
 
   await classifier.train(parameters, fitCallbacks);
-  console.log(classifier.isTrained)
+  console.log(classifier)
   return true;
 }
 
@@ -392,7 +396,7 @@ export default function Interface() {
                   <IconButton aria-label="settings" onClick={() => {
                     setIsTitleFocused(true)
                   }}>
-                    <Edit />
+                    <EditRoundedIcon />
                   </IconButton>
                 </Typography>
               ) : (
@@ -552,7 +556,6 @@ export default function Interface() {
                     <MenuItem value={512}>512</MenuItem>
                   </Select>
                 </div>
-                {/* TODO: Set learning Rate by step: 0.001 */}
                 <div>
                   <Typography>
                     Learning Rate:
@@ -622,13 +625,18 @@ export default function Interface() {
 
     const [timeoutHandler, setTimeoutHandler] = React.useState(1);
     const [state, setState] = React.useState({
-      inputSrc: false,
+      toggleInput: false,
+      inputSrc: 'webcam',
       predictClasses: {}
     });
 
     const handleCheck = (event) => {
       setState({ ...state, [event.target.name]: event.target.checked });
       clearTimeout(timeoutHandler);
+    };
+
+    const handleInputSrc = (event, value) => {
+      setState({ ...state, inputSrc: value });
     };
 
     async function loadWebEl() {
@@ -642,24 +650,23 @@ export default function Interface() {
       webcam.update(); // update the webcam frame
 
       let prediction = preview();
-      console.log(prediction);
+
       prediction.then(res => {
         if (res.label !== "") {
           let probability = res;
-          console.log(probability);
           setState(state => ({ ...state, predictClasses: probability }));
         }
       });
 
-      if (state.inputSrc) setTimeoutHandler(setTimeout(previewLoop, 100))
-    }, [state.inputSrc]);
+      if (state.toggleInput) setTimeoutHandler(setTimeout(previewLoop, 100))
+    }, [state.toggleInput]);
 
     React.useEffect(() => {
       if (isTrained) {
         let webcamLoaded = loadWebEl();
 
         webcamLoaded.then(() => {
-          if (state.inputSrc) {
+          if (state.toggleInput) {
             webcamCanvas.current.appendChild(webcam.canvas);
             previewLoop();
           } else {
@@ -669,30 +676,48 @@ export default function Interface() {
       }
       return () => {
       };
-    }, [previewLoop, state.inputSrc]);
+    }, [previewLoop, state.toggleInput]);
 
     return (
       <Grid container direction="column" justifyContent="space-between" alignItems="stretch" >
         {isTrained ?
           <CardActions className={classes.cardButton}>
+            <ToggleButtonGroup
+              value={state.inputSrc}
+              name="inputSrc"
+              exclusive
+              onChange={handleInputSrc}
+              aria-label="input source"
+            >
+              <ToggleButton value="webcam" aria-label="webcam">
+                <Typography>
+                  Webcam
+                </Typography>
+              </ToggleButton>
+              <ToggleButton value="draw" aria-label="draw">
+                <Typography>
+                  Draw
+                </Typography>
+              </ToggleButton>
+            </ToggleButtonGroup>
             <dev ref={webcamCanvas}></dev>
             <FormGroup row>
               <Box>
                 <Typography>
-                  {state.inputSrc ? "Input ON" : "Input OFF"}
+                  {state.toggleInput ? "Input ON" : "Input OFF"}
                 </Typography>
               </Box>
               <Box>
                 <FormControlLabel
                   control={
                     <Switch
-                      checked={state.inputSrc}
+                      checked={state.toggleInput}
                       onChange={handleCheck}
-                      name="inputSrc"
+                      name="toggleInput"
                       color="primary"
                     />
                   }
-                  label={state.inputSrc}
+                  label={state.toggleInput}
                 />
               </Box>
             </FormGroup>
@@ -702,7 +727,7 @@ export default function Interface() {
             You can preview the prediction here after training a model on the left.
           </Typography>
         }
-        {state.inputSrc ?
+        {state.toggleInput ?
           <PreviewClassConfidence predictClasses={state.predictClasses} color={{ bar: classes.progressBarActive, colorPrimary: classes.progressColorPrimary }} />
           :
           <PreviewClassConfidence predictClasses={state.predictClasses} color={{ bar: classes.progressBarDisable, colorPrimary: classes.progressColorPrimary }} />
