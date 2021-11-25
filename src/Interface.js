@@ -107,8 +107,8 @@ let modelOptions: tmImage.ModelOptions = {
 
 
 let metadata: tmImage.Metadata = {
-  tfjsVersion: "3.9.0",
-  tmVersion: "0.8.5",
+  tfjsVersion: "1.3.1",
+  tmVersion: "2.4.4",
   packageVersion: "0.1.0",
   packageName: "matrix-tm-react",
   modelName: "MobileNet-cp13r",
@@ -138,8 +138,8 @@ async function train(cards) {
   // training graph settings
   const metrics = ['acc', 'val_acc', 'loss', 'val_loss']
   const container = {
-    tab: "GGG",
-    name: 'Model Training',
+    tab: "Training Process",
+    name: '',
     styles: {
       height: '80%'
     }
@@ -169,14 +169,9 @@ async function train(cards) {
 
 async function preview() {
   if (classifier) {
-    if (classifier.numClasses > 0) {
-
-      let flipped = false;
-      let prediction = await classifier.predict(webcam.canvas, flipped);
-
-      return prediction;
-
-    }
+    let flipped = false;
+    let prediction = await classifier.predict(webcam.canvas, flipped);
+    return prediction;
   }
 }
 
@@ -460,46 +455,16 @@ export default function Interface() {
       setSplitValue(newValue);
     };
 
-    let jsonUploadFile, weightsUploadFile;
-
-    const handleUploadJson = (e) => {
-      // console.log(e.target.files[0]);
-      console.log(e.target.files[0]);
-      if (e.target.files[0].name.includes('json')) {
-        jsonUploadFile = e.target.files[0];
-      }
-      if (weightsUploadFile && jsonUploadFile) {
-        handleUploadModel();
-      }
-    };
-
-    const handleUploadWeight = (e) => {
-      // console.log(e.target.files[0]);
-      console.log(e.target.files[0]);
-      if (e.target.files[0].name.includes('bin')) {
-        weightsUploadFile = e.target.files[0];
-      }
-      console.log(weightsUploadFile);
-      console.log(jsonUploadFile);
-
-      if (weightsUploadFile && jsonUploadFile) {
-        handleUploadModel();
-      }
-    };
-
     async function handleUploadModel() {
-      const jsonUpload = document.getElementById('json-upload');
-      const weightsUpload = document.getElementById('weights-upload');
+      const uploadModel = document.getElementById('json-upload');
+      const uploadWeights = document.getElementById('weights-upload');
 
-
-      if (jsonUpload.files.length === 1 & weightsUpload.files.length === 1) {
-        console.log(jsonUpload.files[0]);
-        console.log(weightsUpload.files[0]);
-        const classifier = await tmImage.load(jsonUpload.files[0], weightsUpload.files[0]);
-        // const classifier = await tmImage.loadFromFiles(jsonUpload.files[0], weightsUpload.files[0]);
-        // const classifier = await tf.loadLayersModel(
-        //   tf.io.browserFiles([jsonUpload.files[0], weightsUpload.files[0]]), metadata);
+      if (uploadModel.files.length === 1 & uploadWeights.files.length === 1) {
+        classifier.model = await tf.loadLayersModel(tf.io.browserFiles([uploadModel.files[0], uploadWeights.files[0]]));
         console.log(classifier);
+        if (classifier) {
+          setIsTrained(true);
+        }
       }
     }
 
@@ -698,6 +663,7 @@ export default function Interface() {
       let prediction = preview();
       console.log(prediction);
       prediction.then(res => {
+        console.log(res);
         if (res.label !== "") {
           let probability = res;
           console.log(probability);
@@ -719,13 +685,6 @@ export default function Interface() {
           } else {
             webcamCanvas.current.innerHTML = '';
           }
-          //   } else {
-          //   // Delete old canvas when InputSrc is false.
-          //   const oldcanv = document.getElementById('previewCam')
-          //   if (oldcanv.hasChildNodes()) {
-          //     oldcanv.innerHTML = '';
-          //   }
-          // }
         })
       }
       return () => {
@@ -777,12 +736,12 @@ export default function Interface() {
 
     async function handleExportModel() {
       if (classifier) {
-        // const exportConfig: tf.io.SaveConfig = {
-        //   "trainableOnly": true,
-        //   "includeOptimizer": true,
-        // };
+        const exportConfig: tf.io.SaveConfig = {
+          "trainableOnly": false,
+          "includeOptimizer": true,
+        };
 
-        await classifier.save('downloads://image-model');
+        await classifier.save('downloads://image-model', exportConfig);
       }
     }
 
