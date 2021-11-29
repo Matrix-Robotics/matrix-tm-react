@@ -460,11 +460,13 @@ export default function Interface() {
       const uploadWeights = document.getElementById('weights-upload');
 
       if (uploadModel.files.length === 1 & uploadWeights.files.length === 1) {
-        classifier.model = await tf.loadLayersModel(tf.io.browserFiles([uploadModel.files[0], uploadWeights.files[0]]));
-        console.log(classifier);
-        if (classifier) {
+        tf.loadLayersModel(tf.io.browserFiles([uploadModel.files[0], uploadWeights.files[0]])).then(res => {
+          classifier.model = res;
+          // if (classifier) {
           setIsTrained(true);
-        }
+          // }
+
+        });
       }
     }
 
@@ -653,7 +655,6 @@ export default function Interface() {
     async function loadWebEl() {
       webcam = new tmImage.Webcam(224, 224, false);
       await webcam.setup();
-
       webcam.play();
     }
 
@@ -674,6 +675,7 @@ export default function Interface() {
       if (state.inputSrc) setTimeoutHandler(setTimeout(previewLoop, 100))
     }, [state.inputSrc]);
 
+    // TODO: Nees to fix: After import model, refreshing the page, then the webcam is not working.
     React.useEffect(() => {
       if (isTrained) {
         let webcamLoaded = loadWebEl();
