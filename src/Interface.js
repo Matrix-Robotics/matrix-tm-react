@@ -421,6 +421,9 @@ export default function Interface() {
 
   function TrainColumn(props) {
     const width = useParentWidthSize(props);
+    const [isUploadModel, setIsUploadModel] = React.useState(false);
+    const [isUploadWeights, setIsUploadWeights] = React.useState(false);
+
     const [splitValue, setSplitValue] = React.useState(0.9);
     const [epochsValue, setEpochsValue] = React.useState(50);
     const [batchValue, setBatchValue] = React.useState(16);
@@ -467,12 +470,15 @@ export default function Interface() {
     async function handleUploadModel() {
       const uploadModel = document.getElementById('json-upload');
       const uploadWeights = document.getElementById('weights-upload');
+
       // fileName extension Check
       if (uploadModel.files.length !== 0) {
         // TODO:　Need to change file name to image-model.json
+        setIsUploadModel(true);
       }
       if (uploadWeights.files.length !== 0) {
         // TODO:　Need to change file name to image-model.weights.bin
+        setIsUploadWeights(true);
       }
       // Load Model if both files are uploaded
       if (uploadModel.files.length === 1 & uploadWeights.files.length === 1) {
@@ -516,13 +522,13 @@ export default function Interface() {
             }
           </CardActions>
           <CardActions className={classes.cardButton}>
-            <Button variant="contained" size="large" fullWidth={true}
+            <Button variant="contained" size="large" fullWidth={true} disabled={isUploadModel}
               component="label" startIcon={<ExitToAppRoundedIcon />} onChange={handleUploadModel}
             >
               <input id="json-upload" type="file" accept="*,.json" hidden />
               Upload Json
             </Button>
-            <Button variant="contained" size="large" fullWidth={true}
+            <Button variant="contained" size="large" fullWidth={true} disabled={isUploadWeights}
               component="label" startIcon={<ExitToAppRoundedIcon />} onChange={handleUploadModel}
             >
               <input id="weights-upload" type="file" accept="*,.bin" hidden />
