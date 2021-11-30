@@ -1,3 +1,0 @@
-function ZeroSampleError(props) {
-
-}
