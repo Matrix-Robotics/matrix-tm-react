@@ -462,36 +462,17 @@ export default function Interface() {
       setSplitValue(newValue);
     };
 
-    function getExtension(filename) {
-      // Get file name extension
-      var i = filename.lastIndexOf('.');
-      return (i < 0) ? '' : filename.substr(i);
-    }
-
     /* tf loadLayersModel inputs are image-model.json and image-model.weights.bin 
-      Need to check if the file name extesion is .json or .bin
     */
     async function handleUploadModel() {
       const uploadModel = document.getElementById('json-upload');
       const uploadWeights = document.getElementById('weights-upload');
       // fileName extension Check
       if (uploadModel.files.length !== 0) {
-        if (getExtension(uploadModel.files[uploadModel.files.length - 1].name) === '.json') {
-          // TODO:　Need to change file name to image-model.json
-          console.log(uploadModel.files[uploadModel.files.length - 1].name);
-        }
-        else {
-          uploadModel.value = "";
-        }
+        // TODO:　Need to change file name to image-model.json
       }
       if (uploadWeights.files.length !== 0) {
-        if (getExtension(uploadWeights.files[uploadWeights.files.length - 1].name) === '.bin') {
-          // TODO:　Need to change file name to image-model.weights.bin
-          console.log(uploadWeights.files[uploadWeights.files.length - 1].name);
-        }
-        else {
-          uploadWeights.value = "";
-        }
+        // TODO:　Need to change file name to image-model.weights.bin
       }
       // Load Model if both files are uploaded
       if (uploadModel.files.length === 1 & uploadWeights.files.length === 1) {
@@ -538,13 +519,13 @@ export default function Interface() {
             <Button variant="contained" size="large" fullWidth={true}
               component="label" startIcon={<ExitToAppRoundedIcon />} onChange={handleUploadModel}
             >
-              <input id="json-upload" type="file" hidden />
+              <input id="json-upload" type="file" accept="*,.json" hidden />
               Upload Json
             </Button>
             <Button variant="contained" size="large" fullWidth={true}
               component="label" startIcon={<ExitToAppRoundedIcon />} onChange={handleUploadModel}
             >
-              <input id="weights-upload" type="file" hidden />
+              <input id="weights-upload" type="file" accept="*,.bin" hidden />
               Upload Weights
             </Button>
 
@@ -777,7 +758,7 @@ export default function Interface() {
           "trainableOnly": false,
           "includeOptimizer": true,
         };
-
+        // the array is defined and has at least one element
         await classifier.save('downloads://image-model', exportConfig);
       }
     }
