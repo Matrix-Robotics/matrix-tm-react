@@ -32,7 +32,6 @@ import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 
-
 import Capture from './Capture.js';
 
 import * as tf from '@tensorflow/tfjs';
@@ -455,17 +454,45 @@ export default function Interface() {
       setSplitValue(newValue);
     };
 
+    function getExtension(filename) {
+      // Get file name extension
+      var i = filename.lastIndexOf('.');
+      return (i < 0) ? '' : filename.substr(i);
+    }
+
+    /* tf loadLayersModel inputs are image-model.json and image-model.weights.bin 
+      Need to check if the file name extesion is .json or .bin
+    */
     async function handleUploadModel() {
       const uploadModel = document.getElementById('json-upload');
       const uploadWeights = document.getElementById('weights-upload');
-
+      // fileName extension Check
+      if (uploadModel.files.length !== 0) {
+        if (getExtension(uploadModel.files[uploadModel.files.length - 1].name) === '.json') {
+          // TODO:　Need to change file name to image-model.json
+          console.log(uploadModel.files[uploadModel.files.length - 1].name);
+        }
+        else {
+          uploadModel.value = "";
+        }
+      }
+      if (uploadWeights.files.length !== 0) {
+        if (getExtension(uploadWeights.files[uploadWeights.files.length - 1].name) === '.bin') {
+          // TODO:　Need to change file name to image-model.weights.bin
+          console.log(uploadWeights.files[uploadWeights.files.length - 1].name);
+        }
+        else {
+          uploadWeights.value = "";
+        }
+      }
+      // Load Model if both files are uploaded
       if (uploadModel.files.length === 1 & uploadWeights.files.length === 1) {
-        tf.loadLayersModel(tf.io.browserFiles([uploadModel.files[0], uploadWeights.files[0]])).then(res => {
+        tf.loadLayersModel(tf.io.browserFiles([uploadModel.files[uploadModel.files.length - 1],
+        uploadWeights.files[uploadWeights.files.length - 1]])).then(res => {
           classifier.model = res;
-          // if (classifier) {
           setIsTrained(true);
-          // }
-
+        }).catch(err => {
+          console.error(err);
         });
       }
     }
