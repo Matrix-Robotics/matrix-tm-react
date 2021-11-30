@@ -38,6 +38,7 @@ import * as tf from '@tensorflow/tfjs';
 import * as tfvis from '@tensorflow/tfjs-vis';
 import * as tmImage from '@teachablemachine/image';
 
+
 const ITEM_HEIGHT = 80;
 const useStyles = makeStyles((theme) => ({
   classGrid: {
@@ -421,20 +422,27 @@ export default function Interface() {
   function TrainColumn(props) {
     const width = useParentWidthSize(props);
     const [splitValue, setSplitValue] = React.useState(0.9);
-    const [epochsValue, setEpochsValue] = React.useState("50");
-    const [batchValue, setBatchValue] = React.useState("16");
-    const [lRateValue, setLRateValue] = React.useState("0.001");
+    const [epochsValue, setEpochsValue] = React.useState(50);
+    const [batchValue, setBatchValue] = React.useState(16);
+    const [lRateValue, setLRateValue] = React.useState(0.001);
     const [isShowGraph, setIsShowGraph] = React.useState(true);
 
     // Reset Training Parameters
     const resetAllValues = () => {
       setSplitValue(0.9);
-      setEpochsValue("50");
-      setBatchValue("16");
-      setLRateValue("0.001");
+      setEpochsValue(50);
+      setBatchValue(16);
+      setLRateValue(0.001);
     };
 
+    const handleTrainParameters = () => {
+      parameters["epochs"] = Number(epochsValue);
+      parameters["learningRate"] = Number(lRateValue);
+      parameters["batchSize"] = Number(batchValue);
+    }
+
     const handleTrain = () => {
+      handleTrainParameters();
       props.captureEl.current.forEach(f => f.current.forEach(f => f()));
       // Check is total sample count > 0
       // TODO: ZeroSampleError
@@ -592,7 +600,7 @@ export default function Interface() {
                     displayEmpty
                     inputProps={{ 'aria-label': 'Without label' }}
                   >
-                    <MenuItem value="16">16</MenuItem>
+                    <MenuItem value={16}>16</MenuItem>
                     <MenuItem value={32}>32</MenuItem>
                     <MenuItem value={64}>64</MenuItem>
                     <MenuItem value={128}>128</MenuItem>
