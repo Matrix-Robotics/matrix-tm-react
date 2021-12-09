@@ -1,5 +1,6 @@
 {
   "name": "matrix-tm-react",
+  "homepage": "https://matrix-robotics.github.io/matrix-tm-react",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -14,16 +15,20 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
+    "gh-pages": "^3.2.3",
     "react": "^16.14.0",
     "react-bootstrap": "^1.0.1",
     "react-canvas-draw": "^1.1.1",
     "react-dom": "^16.14.0",
     "react-scripts": "4.0.3",
     "react-webcam": "^6.0.0",
+    "terser": "^5.10.0",
     "typescript": "^4.4.4",
     "web-vitals": "^1.0.1"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
