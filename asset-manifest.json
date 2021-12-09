@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/matrix-tm-react/static/css/main.7d3e9883.chunk.css",
+    "main.js": "/matrix-tm-react/static/js/main.143596e0.chunk.js",
+    "main.js.map": "/matrix-tm-react/static/js/main.143596e0.chunk.js.map",
+    "runtime-main.js": "/matrix-tm-react/static/js/runtime-main.9011ae7b.js",
+    "runtime-main.js.map": "/matrix-tm-react/static/js/runtime-main.9011ae7b.js.map",
+    "static/js/2.17ee2a5b.chunk.js": "/matrix-tm-react/static/js/2.17ee2a5b.chunk.js",
+    "static/js/2.17ee2a5b.chunk.js.map": "/matrix-tm-react/static/js/2.17ee2a5b.chunk.js.map",
+    "static/js/3.4cd9c134.chunk.js": "/matrix-tm-react/static/js/3.4cd9c134.chunk.js",
+    "static/js/3.4cd9c134.chunk.js.map": "/matrix-tm-react/static/js/3.4cd9c134.chunk.js.map",
+    "index.html": "/matrix-tm-react/index.html",
+    "static/css/main.7d3e9883.chunk.css.map": "/matrix-tm-react/static/css/main.7d3e9883.chunk.css.map",
+    "static/js/2.17ee2a5b.chunk.js.LICENSE.txt": "/matrix-tm-react/static/js/2.17ee2a5b.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.9011ae7b.js",
+    "static/js/2.17ee2a5b.chunk.js",
+    "static/css/main.7d3e9883.chunk.css",
+    "static/js/main.143596e0.chunk.js"
+  ]
+}
