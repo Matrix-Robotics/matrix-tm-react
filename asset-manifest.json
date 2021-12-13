@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/matrix-tm-react/static/css/main.7d3e9883.chunk.css",
-    "main.js": "/matrix-tm-react/static/js/main.9b9e26e9.chunk.js",
-    "main.js.map": "/matrix-tm-react/static/js/main.9b9e26e9.chunk.js.map",
+    "main.js": "/matrix-tm-react/static/js/main.ae8d5ddb.chunk.js",
+    "main.js.map": "/matrix-tm-react/static/js/main.ae8d5ddb.chunk.js.map",
     "runtime-main.js": "/matrix-tm-react/static/js/runtime-main.9011ae7b.js",
     "runtime-main.js.map": "/matrix-tm-react/static/js/runtime-main.9011ae7b.js.map",
     "static/js/2.17ee2a5b.chunk.js": "/matrix-tm-react/static/js/2.17ee2a5b.chunk.js",
@@ -17,6 +17,6 @@
     "static/js/runtime-main.9011ae7b.js",
     "static/js/2.17ee2a5b.chunk.js",
     "static/css/main.7d3e9883.chunk.css",
-    "static/js/main.9b9e26e9.chunk.js"
+    "static/js/main.ae8d5ddb.chunk.js"
   ]
 }
