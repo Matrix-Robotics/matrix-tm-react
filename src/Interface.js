@@ -677,7 +677,9 @@ export default function Interface() {
     async function loadWebEl() {
       webcam = new tmImage.Webcam(224, 224, false);
       await webcam.setup();
-      webcam.play();
+      if (state.inputSrc) {
+        await webcam.play();
+      }
     }
 
     const previewLoop = React.useCallback(() => {
