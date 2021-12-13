@@ -97,6 +97,21 @@ export default function Capture(props) {
   const [toggleDraw, setToggleDraw] = React.useState(false);
   const [alertPerm, setAlertPerm] = React.useState(false);
 
+  const askPermission = () => {
+    if (navigator.mediaDevices.getUserMedia !== null) {
+      var options = {
+        video: true,
+        audio: true
+      };
+      navigator.getUserMedia(options, function (stream) {
+        setAlertPerm(false);
+        setToggleDraw(false);
+        setToggleWebcam(prevState => !prevState);
+      }, function (e) {
+        console.log("You must grant this site to access your camera.");
+      });
+    }
+  }
   const handleWebcam = () => {
     if (toggleWebcam) {
       setToggleWebcam(prevState => !prevState);
@@ -118,6 +133,7 @@ export default function Capture(props) {
           setToggleWebcam(prevState => !prevState);
         } else {
           setAlertPerm(true);
+          askPermission();
         }
       });
     }
