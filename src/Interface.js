@@ -646,7 +646,7 @@ export default function Interface() {
                     value={lRateValue}
                     variant="outlined"
                     size="small"
-                    inputProps={{ min: 0, max: 1, step: 0.001 }}
+                    inputProps={{ min: 0, step: 0.001 }}
                     onChange={(e) => setLRateValue(parseFloat(e.target.value).toFixed(3))}
                   />
 
