@@ -31,7 +31,10 @@ import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
+import JSZip from 'jszip';
+import { saveAs } from '@progress/kendo-file-saver';
 
+import b64toBlob from './ImageHandler.js';
 import Capture from './Capture.js';
 
 import * as tf from '@tensorflow/tfjs';
@@ -254,8 +257,41 @@ export default function Interface() {
       setCards(newCards);
     }
 
+    const downloadData = () => {
+      // update global cards imageList state before add new class
+      captureElList.current.forEach(f => f.current[0]());
+      const jszip = new JSZip();
+
+      cards.forEach((card, _) => {
+        let tempImageList = card.imageList;
+        if (typeof tempImageList !== 'undefined' && tempImageList.length > 0) {
+          for (let i = 0; i < tempImageList.length; i++) {
+            // base 64 image to blob
+            let image = b64toBlob(tempImageList[i]);
+            // Adding image to zip
+            jszip.file(`${card.title}/${card.title}_${i}.jpg`, image)
+          }
+        }
+      })
+
+      jszip.generateAsync({ type: 'blob' }).then(function (content) {
+        // see FileSaver.js
+        saveAs(content, `download_data.zip`);
+      });
+    }
+
+    const uploadData = () => {
+    }
+
     return (
       <React.Fragment>
+        <Button variant="contained" size="small" color="primary" onClick={downloadData}>
+          Download All Data
+        </Button>
+        <Button variant="contained" size="small" color="primary" onClick={uploadData}>
+          Upload All Data
+        </Button>
+
         {cards.map((card, index) => (
           <ClassCard key={card.cardId} cardId={card.cardId} cards={cards} title={card.title} imageList={card.imageList} onChange={handleCards} />
         ))}
