@@ -1,4 +1,6 @@
 import React from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
@@ -9,32 +11,32 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardHeader from '@material-ui/core/CardHeader';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import Container from '@material-ui/core/Container';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import FormControl from '@material-ui/core/FormControl';
+import Grid from '@material-ui/core/Grid';
+import IconButton from '@material-ui/core/IconButton';
+import InputLabel from '@material-ui/core/InputLabel';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Select from '@material-ui/core/Select';
 import Slider from '@material-ui/core/Slider';
-import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
-import LinearProgress from '@material-ui/core/LinearProgress';
-import MoreVertIcon from '@material-ui/icons/MoreVert';
-import Edit from "@material-ui/icons/Edit";
-import PublishRoundedIcon from '@material-ui/icons/PublishRounded';
-import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
-import RotateLeftIcon from '@material-ui/icons/RotateLeft';
-import AssessmentOutlinedIcon from '@material-ui/icons/AssessmentOutlined';
-import IconButton from '@material-ui/core/IconButton';
+
 import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
-import Grid from '@material-ui/core/Grid';
-import { makeStyles } from '@material-ui/core/styles';
-import Container from '@material-ui/core/Container';
+import AssessmentOutlinedIcon from '@material-ui/icons/AssessmentOutlined';
+import EditRoundedIcon from '@material-ui/icons/EditRounded';
+import ExitToAppRoundedIcon from '@material-ui/icons/ExitToAppRounded';
+import PublishRoundedIcon from '@material-ui/icons/PublishRounded';
+import RotateLeftIcon from '@material-ui/icons/RotateLeft';
 
 import Capture from './Capture.js';
+import PredictDrawing from "./draw/PredictDraw";
 
-import * as tf from '@tensorflow/tfjs';
+// import * as tf from '@tensorflow/tfjs';
 import * as tfvis from '@tensorflow/tfjs-vis';
 import * as tmImage from '@teachablemachine/image';
 
@@ -52,6 +54,8 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(4)
   },
   cardButton: {
+    alignItems: 'center',
+    flexDirection: 'column',
     padding: theme.spacing(2)
   },
   cardAction: {
@@ -76,6 +80,11 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing(2)
+  },
+  formControl: {
+    minWidth: 224,
+    width: '70%',
+    margin: theme.spacing(2)
   },
   footer: {
     backgroundColor: theme.palette.background.paper,
@@ -128,8 +137,7 @@ let parameters = tmImage.TrainingParameters = {
 }
 
 async function loadPretrained() {
-  // Load the model.
-  // TODO: To load pre-trained model in "Train"
+  // Load the model from remote server
   classifier = await tmImage.createTeachable(metadata, modelOptions);
 }
 
@@ -151,29 +159,29 @@ async function train(cards) {
 
   classifier.setLabels(cards.map(({ title }) => title));
 
-  cards.forEach((card, card_index) => {
+  cards.forEach((card, cardIndex) => {
     let tempImageList = card.imageList;
     if (typeof tempImageList !== 'undefined' && tempImageList.length > 0) {
       tempImageList.forEach(image => {
         // blob to HTMLImageElement
         let tempImageEl = new Image(224, 224);
         tempImageEl.src = image;
-        classifier.addExample(card_index, tempImageEl);
+        classifier.addExample(cardIndex, tempImageEl);
       });
     }
   })
 
   await classifier.train(parameters, fitCallbacks);
-  console.log(classifier.isTrained)
+  console.log(classifier)
   return true;
 }
 
-async function preview() {
+async function preview(input) {
 
   if (classifier.numClasses > 0) {
 
     let flipped = false;
-    let prediction = await classifier.predict(webcam.canvas, flipped);
+    let prediction = await classifier.predict(input, flipped);
 
     return prediction;
   }
@@ -392,7 +400,7 @@ export default function Interface() {
                   <IconButton aria-label="settings" onClick={() => {
                     setIsTitleFocused(true)
                   }}>
-                    <Edit />
+                    <EditRoundedIcon />
                   </IconButton>
                 </Typography>
               ) : (
@@ -445,6 +453,7 @@ export default function Interface() {
       // TODO: ZeroSampleError
       if (cards.map(({ imageList }) => imageList).flat(1).length > 0) {
         setIsTraining((prev) => !prev);
+
 
         train(cards).then(res => {
           setIsTrained(res);
@@ -552,7 +561,6 @@ export default function Interface() {
                     <MenuItem value={512}>512</MenuItem>
                   </Select>
                 </div>
-                {/* TODO: Set learning Rate by step: 0.001 */}
                 <div>
                   <Typography>
                     Learning Rate:
@@ -567,7 +575,7 @@ export default function Interface() {
                     value={lRateValue}
                     variant="outlined"
                     size="small"
-                    inputProps={{step: 0.001}}
+                    inputProps={{ step: 0.001 }}
                     onChange={(e) => setLRateValue(parseFloat(e.target.value).toFixed(3))}
                   />
 
@@ -622,87 +630,113 @@ export default function Interface() {
 
     const [timeoutHandler, setTimeoutHandler] = React.useState(1);
     const [state, setState] = React.useState({
-      inputSrc: false,
+      toggleInput: false,
+      inputSrc: 'webcam',
+      isWebcamOn: true,
+      predictImage: new Image(224, 224),
       predictClasses: {}
     });
-
-    const handleCheck = (event) => {
-      setState({ ...state, [event.target.name]: event.target.checked });
-      clearTimeout(timeoutHandler);
-    };
 
     async function loadWebEl() {
       webcam = new tmImage.Webcam(224, 224, false);
       await webcam.setup();
-
       webcam.play();
+
+      setState(state => ({ ...state, isWebcamOn: true }));
     }
 
-    const previewLoop = React.useCallback(() => {
-      webcam.update(); // update the webcam frame
+    const previewLoop = React.useCallback((input) => {
+      let prediction = preview(input);
 
-      let prediction = preview();
-      console.log(prediction);
       prediction.then(res => {
         if (res.label !== "") {
           let probability = res;
-          console.log(probability);
           setState(state => ({ ...state, predictClasses: probability }));
         }
       });
 
-      if (state.inputSrc) setTimeoutHandler(setTimeout(previewLoop, 100))
+      if (state.inputSrc === "webcam") {
+        webcam.update(); // update the webcam frame
+        setTimeoutHandler(setTimeout(previewLoop, 100, input))
+      }
     }, [state.inputSrc]);
+
+    const handleInputSrc = (event) => {
+      clearTimeout(timeoutHandler);
+      setState(state => ({ ...state, inputSrc: event.target.value }));
+      if (event.target.value !== "webcam") {
+        setState(state => ({ ...state, isWebcamOn: false }));
+      }
+    };
+
+    const handleDraw = (imageSrc) => {
+      let tempImageEl = new Image(224, 224);
+      tempImageEl.src = imageSrc;
+      setState(state => ({ ...state, predictImage: tempImageEl }));
+    };
+
+    React.useEffect(() => {
+      console.log(state.predictImage);
+    }, [state.predictImage]);
+
+    React.useEffect(() => {
+      if (!state.isWebcamOn) {
+        webcam.stop();
+      }
+    }, [state.isWebcamOn]);
 
     React.useEffect(() => {
       if (isTrained) {
-        let webcamLoaded = loadWebEl();
-
-        webcamLoaded.then(() => {
-          if (state.inputSrc) {
-            webcamCanvas.current.appendChild(webcam.canvas);
-            previewLoop();
-          } else {
-            webcamCanvas.current.innerHTML = '';
-          }
-        })
+        switch (state.inputSrc) {
+          case 'off':
+            break;
+          case 'webcam':
+            let webcamLoaded = loadWebEl();
+            webcamLoaded.then(() => {
+              webcamCanvas.current.appendChild(webcam.canvas);
+              previewLoop(webcam.canvas);
+            })
+            break;
+          case 'drawing':
+            previewLoop(state.predictImage);
+            break;
+          case 'file':
+            break;
+          default:
+        }
       }
       return () => {
       };
-    }, [previewLoop, state.inputSrc]);
+    }, [previewLoop, state.inputSrc, state.predictImage]);
 
     return (
       <Grid container direction="column" justifyContent="space-between" alignItems="stretch" >
         {isTrained ?
-          <CardActions className={classes.cardButton}>
-            <dev ref={webcamCanvas}></dev>
-            <FormGroup row>
-              <Box>
-                <Typography>
-                  {state.inputSrc ? "Input ON" : "Input OFF"}
-                </Typography>
-              </Box>
-              <Box>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={state.inputSrc}
-                      onChange={handleCheck}
-                      name="inputSrc"
-                      color="primary"
-                    />
-                  }
-                  label={state.inputSrc}
-                />
-              </Box>
-            </FormGroup>
+          <CardActions className={classes.cardButton} disableSpacing={true}>
+            <FormControl variant="outlined" className={classes.formControl}>
+              <InputLabel id="preview-input-source-label">Input</InputLabel>
+              <Select
+                labelId="preview-input-source-label"
+                id="preview-input-source"
+                value={state.inputSrc}
+                onChange={handleInputSrc}
+                label="Input"
+              >
+                <MenuItem value="off">OFF</MenuItem>
+                <MenuItem value="webcam">Webcam</MenuItem>
+                <MenuItem value="drawing">Canvas</MenuItem>
+                <MenuItem value="file">File</MenuItem>
+              </Select>
+            </FormControl>
+            {state.inputSrc === "webcam" && <div ref={webcamCanvas}></div>}
+            {state.inputSrc === "drawing" && <PredictDrawing onChange={handleDraw} />}
           </CardActions>
           :
           <Typography>
             You can preview the prediction here after training a model on the left.
           </Typography>
         }
-        {state.inputSrc ?
+        {state.inputSrc !== "off" ?
           <PreviewClassConfidence predictClasses={state.predictClasses} color={{ bar: classes.progressBarActive, colorPrimary: classes.progressColorPrimary }} />
           :
           <PreviewClassConfidence predictClasses={state.predictClasses} color={{ bar: classes.progressBarDisable, colorPrimary: classes.progressColorPrimary }} />

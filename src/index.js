@@ -5,9 +5,7 @@ import Interface from './Interface';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <Interface />
-  </React.StrictMode>,
+  <Interface />,
   document.getElementById('root')
 );
 
