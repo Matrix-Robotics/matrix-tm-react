@@ -637,6 +637,7 @@ export default function Interface() {
       predictClasses: {}
     });
 
+
     async function loadWebEl() {
       webcam = new tmImage.Webcam(224, 224, false);
       await webcam.setup();
